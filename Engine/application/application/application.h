@@ -1,9 +1,12 @@
 #pragma once
 
-#include <core/thread/thread.h>
 
 namespace em
 {
+
+struct FiberPool;
+struct WorkerThread;
+class Scheduler;
 
 class Application
 {
@@ -17,6 +20,7 @@ public:
 private:
 
 	FiberPool* _fiber_pool;
+	Scheduler* _scheduler;
 	WorkerThread* _worker_threads;
 
 };

@@ -14,26 +14,33 @@ namespace em
 
 void CALLBACK internal_fiber_proc(void* fiber_params)
 {
+	Fiber* fiber = (Fiber*)fiber_params;
+	fiber->func();
 }
 
 
-void initialize_fiber_pool(FiberPool* fiber_pool)
+FiberPool::FiberPool(unsigned small_fiber_count, unsigned large_fiber_count)
+: _small_fiber_count(small_fiber_count)
+, _large_fiber_count(large_fiber_count)
 {
-	fiber_pool->small_fibers = malloc(sizeof(void*) * fiber_pool->small_fiber_count);
-	fiber_pool->large_fibers = malloc(sizeof(void*) * fiber_pool->large_fiber_count);
-	for(unsigned i = 0; i < fiber_pool->small_fiber_count; ++i)
+	_small_fibers = new Fiber[small_fiber_count];
+	_large_fibers = new Fiber[large_fiber_count];
+	memset(_small_fibers, 0, sizeof(Fiber)*small_fiber_count);
+	memset(_large_fibers, 0, sizeof(Fiber)*large_fiber_count);
+
+	for(unsigned i = 0; i < small_fiber_count; ++i)
 	{
-		void* fiber = (void*)((size_t)fiber_pool->small_fibers + sizeof(void*) * i);
-		fiber = CreateFiber(SMALL_FIBER_STACK_SIZE, &internal_fiber_proc, 0);
-	}
-		
-	for (unsigned i = 0; i < fiber_pool->large_fiber_count; ++i)
-	{
-		void* fiber = (void*)((size_t)fiber_pool->large_fibers + sizeof(void*)* i);
-		fiber = CreateFiber(LARGE_FIBER_STACK_SIZE, &internal_fiber_proc, 0);
+		_small_fibers[i].fiber_handle = CreateFiber(SMALL_FIBER_STACK_SIZE, &internal_fiber_proc, &_small_fibers[i]);
 	}
 
+	for (unsigned i = 0; i < large_fiber_count; ++i)
+	{
+		_large_fibers[i].fiber_handle = CreateFiber(LARGE_FIBER_STACK_SIZE, &internal_fiber_proc, &_large_fibers[i]);
+	}
 }
 
+FiberPool::~FiberPool()
+{
+}
 	
 }

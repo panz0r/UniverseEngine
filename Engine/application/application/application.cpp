@@ -1,5 +1,8 @@
 #include "application.h"
 
+#include <core/thread/fiber_pool.h>
+#include <core/thread/scheduler.h>
+
 namespace em
 {
 
@@ -11,19 +14,17 @@ Application::~Application()
 
 void Application::initialize()
 {
-	_fiber_pool = new FiberPool();
-	_fiber_pool->large_fiber_count = 32;
-	_fiber_pool->small_fiber_count = 64;
-	initialize_fiber_pool(_fiber_pool);
+	_fiber_pool = new FiberPool(64, 32);
+	_scheduler = new Scheduler(_fiber_pool);
 }
 
 
 
-void entry_job(JobParams* params)
+void thread_entry_job(JobParams* params)
 {
 	Fiber* this_fiber = convert_thread_to_fiber();
 
-	FiberPool* fiber_pool = params->fiber_pool;
+	FiberPool* fiber_pool = params->fiber_pool; 
 	JobQueue* job_queue = params->job_queue;
 	WaitList* wait_list = params->wait_list;
 	
@@ -45,8 +46,8 @@ void entry_job(JobParams* params)
 int Application::run()
 {
 	// Queue up system jobs
-	_scheduler.enqueue(&entry_job, HIGH_PRIORITY);
-	_scheduler.enqueue(&entry_job, HIGH_PRIORITY);
+	_scheduler.enqueue(&thread_entry_job, HIGH_PRIORITY);
+	_scheduler.enqueue(&thread_entry_job, HIGH_PRIORITY);
 	_scheduler.enqueue(&game_update, HIGH_PRIORITY);
 	_scheduler.enqueue(&render, HIGH_PRIORITY);
 

@@ -3,16 +3,27 @@
 namespace em
 {
 
-struct FiberPool
+typedef void (*fiber_proc)();
+
+struct Fiber
 {
-	unsigned small_fiber_count;
-	unsigned large_fiber_count;
-	void* small_fibers;
-	void* large_fibers;
+	void* fiber_handle;
+	fiber_proc func;
 };
 
-
-void initialize_fiber_pool(FiberPool* pool);
+class FiberPool
+{
+public:
+	FiberPool(unsigned small_fiber_count, unsigned large_fiber_count);
+	~FiberPool();
+	
+private:
+	
+	unsigned _small_fiber_count;
+	unsigned _large_fiber_count;
+	Fiber* _small_fibers;
+	Fiber* _large_fibers;
+};
 
 
 }
