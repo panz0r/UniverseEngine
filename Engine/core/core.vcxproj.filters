@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="thread">
+      <UniqueIdentifier>{14927fd0-ef74-4212-b152-31a503c6473c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="thread\fiber_pool.h">
+      <Filter>thread</Filter>
+    </ClInclude>
+    <ClInclude Include="thread\worker_thread.h">
+      <Filter>thread</Filter>
+    </ClInclude>
+    <ClInclude Include="thread\scheduler.h">
+      <Filter>thread</Filter>
+    </ClInclude>
+    <ClInclude Include="thread\job.h">
+      <Filter>thread</Filter>
+    </ClInclude>
+    <ClInclude Include="thread\threading.h">
+      <Filter>thread</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="thread\fiber_pool.cpp">
+      <Filter>thread</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
