@@ -23,10 +23,12 @@
     <ClInclude Include="thread\job.h" />
     <ClInclude Include="thread\scheduler.h" />
     <ClInclude Include="thread\threading.h" />
+    <ClInclude Include="thread\wait_list.h" />
     <ClInclude Include="thread\worker_thread.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="thread\fiber_pool.cpp" />
+    <ClCompile Include="thread\wait_list.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B0C87C07-2FA9-4965-8E05-7F02FE58D1DE}</ProjectGuid>

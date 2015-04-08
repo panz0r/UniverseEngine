@@ -6,7 +6,7 @@ namespace em
 WaitList::WaitList(unsigned backlog_size)
 : _backlog_size(backlog_size)
 {
-	_waiting_fibers = new WaitList[backlog_size];
+	_waiting_fibers = new WaitEntry[backlog_size];
 	memset(_waiting_fibers, 0, sizeof(WaitEntry)*backlog_size);
 }
 
@@ -22,6 +22,8 @@ unsigned WaitList::insert(const WaitEntry& entry)
 		_current_index.exchange(1, std::memory_order_relaxed);
 		index = 0;
 	}
+
+	return index;
 }
 
 }

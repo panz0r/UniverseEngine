@@ -21,9 +21,15 @@
     <ClInclude Include="thread\threading.h">
       <Filter>thread</Filter>
     </ClInclude>
+    <ClInclude Include="thread\wait_list.h">
+      <Filter>thread</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="thread\fiber_pool.cpp">
+      <Filter>thread</Filter>
+    </ClCompile>
+    <ClCompile Include="thread\wait_list.cpp">
       <Filter>thread</Filter>
     </ClCompile>
   </ItemGroup>
