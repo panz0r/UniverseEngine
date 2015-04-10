@@ -22,7 +22,7 @@ void Application::initialize()
 
 void thread_entry_job(JobParams* params)
 {
-	Fiber* this_fiber = convert_thread_to_fiber();
+	Fiber* this_fiber = convert_thread_to_fiber(params);
 
 	FiberPool* fiber_pool = params->fiber_pool; 
 	JobQueue* job_queue = params->job_queue;

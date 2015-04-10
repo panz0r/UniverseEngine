@@ -3,13 +3,7 @@
 namespace em
 {
 
-typedef void (*fiber_proc)();
-
-struct Fiber
-{
-	void* fiber_handle;
-	fiber_proc func;
-};
+struct Fiber;
 
 class FiberPool
 {

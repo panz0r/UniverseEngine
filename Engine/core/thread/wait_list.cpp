@@ -23,7 +23,15 @@ unsigned WaitList::insert(const WaitEntry& entry)
 		index = 0;
 	}
 
+	while(index > _backlog_size) {
+		index = _current_index.fetch_add(1, std::memory_order_relaxed);
+	}
+
+	memcpy(&_waiting_fibers[index], &entry, sizeof(WaitEntry));
+
 	return index;
 }
+
+
 
 }

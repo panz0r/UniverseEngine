@@ -19,8 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="thread\fiber.h" />
     <ClInclude Include="thread\fiber_pool.h" />
     <ClInclude Include="thread\job.h" />
+    <ClInclude Include="thread\job_queue.h" />
     <ClInclude Include="thread\scheduler.h" />
     <ClInclude Include="thread\threading.h" />
     <ClInclude Include="thread\wait_list.h" />
@@ -28,6 +30,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="thread\fiber_pool.cpp" />
+    <ClCompile Include="thread\scheduler.cpp" />
+    <ClCompile Include="thread\threading.cpp" />
     <ClCompile Include="thread\wait_list.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -4,6 +4,9 @@
     <Filter Include="thread">
       <UniqueIdentifier>{14927fd0-ef74-4212-b152-31a503c6473c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="container">
+      <UniqueIdentifier>{81a896c8-e994-46de-aeb2-91269cf9a8fe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="thread\fiber_pool.h">
@@ -24,12 +27,24 @@
     <ClInclude Include="thread\wait_list.h">
       <Filter>thread</Filter>
     </ClInclude>
+    <ClInclude Include="thread\fiber.h">
+      <Filter>thread</Filter>
+    </ClInclude>
+    <ClInclude Include="thread\job_queue.h">
+      <Filter>thread</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="thread\fiber_pool.cpp">
       <Filter>thread</Filter>
     </ClCompile>
     <ClCompile Include="thread\wait_list.cpp">
+      <Filter>thread</Filter>
+    </ClCompile>
+    <ClCompile Include="thread\threading.cpp">
+      <Filter>thread</Filter>
+    </ClCompile>
+    <ClCompile Include="thread\scheduler.cpp">
       <Filter>thread</Filter>
     </ClCompile>
   </ItemGroup>
