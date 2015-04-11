@@ -21,7 +21,7 @@
   <ItemGroup>
     <ClInclude Include="thread\fiber.h" />
     <ClInclude Include="thread\fiber_pool.h" />
-    <ClInclude Include="thread\job.h" />
+    <ClInclude Include="thread\job_declaration.h" />
     <ClInclude Include="thread\job_queue.h" />
     <ClInclude Include="thread\scheduler.h" />
     <ClInclude Include="thread\threading.h" />

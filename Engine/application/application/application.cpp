@@ -18,7 +18,24 @@ void Application::initialize()
 	_scheduler = new Scheduler(_fiber_pool);
 }
 
+void test_sub_job(JobData* data)
+{
+	// Do some shit
+}
 
+void test_job(JobParams* params)
+{
+	
+	JobDeclaration jobs[100];
+	for(unsigned i = 0; i < 100; ++i)
+	{
+		jobs[i] = JobDeclaration(&test_sub_job, NULL);
+	}
+
+	Counter* counter = NULL;
+	ScheduleJobs(&jobs, 100, &counter);
+
+}
 
 void thread_entry_job(JobParams* params)
 {

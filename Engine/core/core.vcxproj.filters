@@ -18,9 +18,6 @@
     <ClInclude Include="thread\scheduler.h">
       <Filter>thread</Filter>
     </ClInclude>
-    <ClInclude Include="thread\job.h">
-      <Filter>thread</Filter>
-    </ClInclude>
     <ClInclude Include="thread\threading.h">
       <Filter>thread</Filter>
     </ClInclude>
@@ -31,6 +28,9 @@
       <Filter>thread</Filter>
     </ClInclude>
     <ClInclude Include="thread\job_queue.h">
+      <Filter>thread</Filter>
+    </ClInclude>
+    <ClInclude Include="thread\job_declaration.h">
       <Filter>thread</Filter>
     </ClInclude>
   </ItemGroup>
