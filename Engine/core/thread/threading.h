@@ -6,8 +6,7 @@ namespace em
 {
 
 struct Fiber;
-struct JobParams;
 
-Fiber* convert_thread_to_fiber(JobParams* params);
+Fiber* convert_thread_to_fiber(void* params);
 
 }

@@ -4,7 +4,7 @@
 namespace em
 {
 
-struct FiberPool;
+class FiberPool;
 struct WorkerThread;
 class Scheduler;
 

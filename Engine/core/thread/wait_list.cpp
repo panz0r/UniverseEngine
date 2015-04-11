@@ -1,4 +1,10 @@
 #include "wait_list.h"
+#include <malloc.h>
+#include "counter.h"
+
+
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 
 namespace em
 {
@@ -6,32 +12,39 @@ namespace em
 WaitList::WaitList(unsigned backlog_size)
 : _backlog_size(backlog_size)
 {
-	_waiting_fibers = new WaitEntry[backlog_size];
-	memset(_waiting_fibers, 0, sizeof(WaitEntry)*backlog_size);
+	size_t size = sizeof(WaitEntry) * backlog_size;
+	_waiting_fibers = (WaitEntry*)_aligned_malloc(size, 64);
+	memset(_waiting_fibers, 0, size*backlog_size);
 }
 
 WaitList::~WaitList()
 {
 }
 
-
-unsigned WaitList::insert(const WaitEntry& entry)
+void WaitList::insert(Counter* counter)
 {
-	unsigned index = _current_index.fetch_add(1, std::memory_order_relaxed);
-	if(index == _backlog_size) {
-		_current_index.exchange(1, std::memory_order_relaxed);
-		index = 0;
+	for(unsigned i = 0; i < _backlog_size; ++i)
+	{
+		if(_waiting_fibers[i].counter = NULL) {
+			_waiting_fibers[i].counter = counter;
+			_waiting_fibers[i].fiber_handle = GetCurrentFiber();
+			return;
+		}
 	}
 
-	while(index > _backlog_size) {
-		index = _current_index.fetch_add(1, std::memory_order_relaxed);
-	}
-
-	memcpy(&_waiting_fibers[index], &entry, sizeof(WaitEntry));
-
-	return index;
+	assert(false && "wait list is full");
 }
 
-
+WaitEntry* WaitList::get_next_ready_fiber()
+{
+	for (unsigned i = 0; i < _backlog_size; ++i)
+	{
+		if(_waiting_fibers[i].counter != NULL && _waiting_fibers[i].counter->is_zero())
+		{
+			return &_waiting_fibers[i];
+		}
+	}
+	return NULL;
+}
 
 }

@@ -1,7 +1,9 @@
 #include "application.h"
 
+#include <core/thread/threading.h>
 #include <core/thread/fiber_pool.h>
 #include <core/thread/scheduler.h>
+#include <core/thread/job_declaration.h>
 
 namespace em
 {
@@ -18,12 +20,12 @@ void Application::initialize()
 	_scheduler = new Scheduler(_fiber_pool);
 }
 
-void test_sub_job(JobData* data)
+void test_sub_job(void* data)
 {
 	// Do some shit
 }
 
-void test_job(JobParams* params)
+void test_job(void* params)
 {
 	
 	JobDeclaration jobs[100];
@@ -33,11 +35,11 @@ void test_job(JobParams* params)
 	}
 
 	Counter* counter = NULL;
-	ScheduleJobs(&jobs, 100, &counter);
+	schedule_jobs((JobDeclaration*)&jobs, 100, &counter);
 
 }
 
-void thread_entry_job(JobParams* params)
+void thread_entry_job(void* params)
 {
 	Fiber* this_fiber = convert_thread_to_fiber(params);
 
@@ -56,17 +58,18 @@ void thread_entry_job(JobParams* params)
 	fiber->set_job(job);
 	int *counter = wait_list->put(this_fiber, 1);
 
-	switch_to_fiber_and_wait(fiber, counter, 0);
+	wait_for_counter(counter);
+
 }
 
 
 int Application::run()
 {
 	// Queue up system jobs
-	_scheduler.enqueue(&thread_entry_job, HIGH_PRIORITY);
-	_scheduler.enqueue(&thread_entry_job, HIGH_PRIORITY);
-	_scheduler.enqueue(&game_update, HIGH_PRIORITY);
-	_scheduler.enqueue(&render, HIGH_PRIORITY);
+	_scheduler.enqueue(&thread_entry_job, PRIORITY_NORMAL);
+	_scheduler.enqueue(&thread_entry_job, PRIORITY_NORMAL);
+	//_scheduler.enqueue(&game_update, HIGH_PRIORITY);
+	//_scheduler.enqueue(&render, HIGH_PRIORITY);
 
 	// Frame start
 	spawn_worker_thread(_scheduler, HW_THREAD_AFFINITY_0);

@@ -1,10 +1,19 @@
 #pragma once
 
+#include <malloc.h>
 #include "job_declaration.h"
 #include <atomic>
 
 namespace em 
 {
+
+__declspec(align(64)) struct JobQueueEntry
+{
+	JobDeclaration* declaration;
+	Counter* counter;
+
+	char padding[64 - sizeof(void*)*2];
+};
 
 class JobQueue
 {
@@ -15,21 +24,29 @@ public:
 		, _read_head(0)
 		, _write_head(0)
 	{
-		_buffer = (JobDeclaration**)malloc(sizeof(JobDeclaration*)*size);
+		size_t job_decl_size = sizeof(JobQueueEntry);
+		_buffer = (JobQueueEntry*)_aligned_malloc(job_decl_size*size, 64);
 		unlock(); // initialize lock
 	}
 
-	void enqueue(JobDeclaration* job)
+	void enqueue(JobDeclaration* job, Counter* counter)
 	{
-		_buffer[_write_head] = job;
+		JobQueueEntry& entry = _buffer[_write_head];
+		entry.declaration = job;
+		entry.counter = counter;
 		_write_head = (_write_head + 1) % _size;
 	}
 
-	const JobDeclaration* dequeue()
+	bool dequeue(JobDeclaration** job_decl, Counter** counter)
 	{
-		const JobDeclaration* job = _buffer[_read_head];
+		if(_read_head == _write_head)
+			return false;
+
+		JobQueueEntry& entry = _buffer[_read_head];
+		*job_decl = entry.declaration;
+		*counter = entry.counter;
 		_read_head = (_read_head + 1) % _size;
-		return job;
+		return true;
 	}
 
 	void lock()
@@ -49,7 +66,7 @@ private:
 	unsigned _size;
 	unsigned _read_head;
 	unsigned _write_head;
-	JobDeclaration** _buffer;
+	JobQueueEntry* _buffer;
 };
 
 

@@ -33,6 +33,7 @@
     <ClInclude Include="thread\job_declaration.h">
       <Filter>thread</Filter>
     </ClInclude>
+    <ClInclude Include="thread\counter.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="thread\fiber_pool.cpp">

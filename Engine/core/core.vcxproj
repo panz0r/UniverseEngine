@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="thread\counter.h" />
     <ClInclude Include="thread\fiber.h" />
     <ClInclude Include="thread\fiber_pool.h" />
     <ClInclude Include="thread\job_declaration.h" />

@@ -5,12 +5,13 @@ namespace em
 
 struct JobParams;
 
-typedef void (*fiber_proc)(JobParams* params);
+typedef void (*JobFunc)(void* params);
 
 struct Fiber
 {
+	void* params;
 	void* fiber_handle;
-	fiber_proc func;
+	JobFunc func;
 };
 
 }
