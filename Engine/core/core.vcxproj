@@ -24,14 +24,14 @@
     <ClInclude Include="thread\fiber_pool.h" />
     <ClInclude Include="thread\job_declaration.h" />
     <ClInclude Include="thread\job_queue.h" />
-    <ClInclude Include="thread\scheduler.h" />
+    <ClInclude Include="thread\fiber_system.h" />
     <ClInclude Include="thread\threading.h" />
     <ClInclude Include="thread\wait_list.h" />
     <ClInclude Include="thread\worker_thread.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="thread\fiber_pool.cpp" />
-    <ClCompile Include="thread\scheduler.cpp" />
+    <ClCompile Include="thread\fiber_system.cpp" />
     <ClCompile Include="thread\threading.cpp" />
     <ClCompile Include="thread\wait_list.cpp" />
   </ItemGroup>
@@ -139,7 +139,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

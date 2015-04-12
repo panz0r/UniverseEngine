@@ -4,10 +4,6 @@
 namespace em
 {
 
-class FiberPool;
-struct WorkerThread;
-class Scheduler;
-
 class Application
 {
 public:
@@ -19,9 +15,6 @@ public:
 
 private:
 
-	FiberPool* _fiber_pool;
-	Scheduler* _scheduler;
-	WorkerThread* _worker_threads;
 
 };
 

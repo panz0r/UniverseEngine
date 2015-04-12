@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include "threading.h"
 
 namespace em
 {
@@ -24,15 +25,14 @@ public:
 	void insert(Counter* counter);
 	WaitEntry* get_next_ready_fiber(); // TODO, priority
 
-	void lock()
+	inline void lock()
 	{
-		bool val = false;
-		while (!_lock.compare_exchange_weak(val, true, std::memory_order_acquire));
+		fiber_lock(&_lock);
 	}
 
-	void unlock()
+	inline void unlock()
 	{
-		_lock.store(false, std::memory_order_release);
+		fiber_unlock(&_lock);
 	}
 
 private:

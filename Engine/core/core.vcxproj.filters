@@ -15,9 +15,6 @@
     <ClInclude Include="thread\worker_thread.h">
       <Filter>thread</Filter>
     </ClInclude>
-    <ClInclude Include="thread\scheduler.h">
-      <Filter>thread</Filter>
-    </ClInclude>
     <ClInclude Include="thread\threading.h">
       <Filter>thread</Filter>
     </ClInclude>
@@ -34,6 +31,9 @@
       <Filter>thread</Filter>
     </ClInclude>
     <ClInclude Include="thread\counter.h" />
+    <ClInclude Include="thread\fiber_system.h">
+      <Filter>thread</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="thread\fiber_pool.cpp">
@@ -45,7 +45,7 @@
     <ClCompile Include="thread\threading.cpp">
       <Filter>thread</Filter>
     </ClCompile>
-    <ClCompile Include="thread\scheduler.cpp">
+    <ClCompile Include="thread\fiber_system.cpp">
       <Filter>thread</Filter>
     </ClCompile>
   </ItemGroup>

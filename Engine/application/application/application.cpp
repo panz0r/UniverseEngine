@@ -1,12 +1,15 @@
 #include "application.h"
 
 #include <core/thread/threading.h>
-#include <core/thread/fiber_pool.h>
-#include <core/thread/scheduler.h>
+#include <core/thread/fiber_system.h>
 #include <core/thread/job_declaration.h>
+
+#include <atomic>
 
 namespace em
 {
+
+std::atomic<int> global_counter;
 
 Application::Application()
 {}
@@ -16,72 +19,82 @@ Application::~Application()
 
 void Application::initialize()
 {
-	_fiber_pool = new FiberPool(64, 32);
-	_scheduler = new Scheduler(_fiber_pool);
+	initialize_fiber_system();
 }
 
 void test_sub_job(void* data)
 {
 	// Do some shit
+	int apa = 1;
+	int palle = 2;
+
 }
 
 void test_job(void* params)
 {
 	
-	JobDeclaration jobs[100];
-	for(unsigned i = 0; i < 100; ++i)
+	const unsigned n_jobs = 200;
+	JobDeclaration jobs[n_jobs];
+	for(unsigned i = 0; i < n_jobs; ++i)
 	{
 		jobs[i] = JobDeclaration(&test_sub_job, NULL);
 	}
 
 	Counter* counter = NULL;
-	schedule_jobs((JobDeclaration*)&jobs, 100, &counter);
-
+	schedule_jobs((JobDeclaration*)&jobs, n_jobs, &counter);
+	wait_for_counter(counter);
 }
 
-void thread_entry_job(void* params)
+
+DWORD WINAPI thread_entry_job(void* params)
 {
 	Fiber* this_fiber = convert_thread_to_fiber(params);
 
-	FiberPool* fiber_pool = params->fiber_pool; 
-	JobQueue* job_queue = params->job_queue;
-	WaitList* wait_list = params->wait_list;
-	
-	Job* job = NULL;
-	// Spin until a job pops up
-	while(job_queue->dequeue(job) == false)
-	{
-		Sleep(1);
-	}
-	
-	Fiber* fiber = fiber_pool->get_fiber(SMALL_STACK);
-	fiber->set_job(job);
-	int *counter = wait_list->put(this_fiber, 1);
-
+	JobDeclaration job = JobDeclaration(&test_job, NULL);
+	Counter* counter = NULL;
+	schedule_jobs(&job, 1, &counter);
 	wait_for_counter(counter);
 
+
+	ConvertFiberToThread();
+	global_counter--;
+	return 0;
 }
 
 
 int Application::run()
 {
+
+	
 	// Queue up system jobs
-	_scheduler.enqueue(&thread_entry_job, PRIORITY_NORMAL);
-	_scheduler.enqueue(&thread_entry_job, PRIORITY_NORMAL);
+	//_scheduler.enqueue(&thread_entry_job, PRIORITY_NORMAL);
+	//_scheduler.enqueue(&thread_entry_job, PRIORITY_NORMAL);
 	//_scheduler.enqueue(&game_update, HIGH_PRIORITY);
 	//_scheduler.enqueue(&render, HIGH_PRIORITY);
 
-	// Frame start
-	spawn_worker_thread(_scheduler, HW_THREAD_AFFINITY_0);
-	spawn_worker_thread(_scheduler, HW_THREAD_AFFINITY_1);
+	global_counter.store(4);
+
+	create_worker_thread(thread_entry_job, 1<<0);
+	create_worker_thread(thread_entry_job, 1<<1);
+	create_worker_thread(thread_entry_job, 1<<2);
+	create_worker_thread(thread_entry_job, 1<<3);
+	//create_worker_thread(thread_entry_job, 1<<4);
+	//create_worker_thread(thread_entry_job, 1<<5);
+
+
 	
 	// Wait for all work to be done
-	wait_for_signal(&_signal);
+	//wait_for_signal(&_signal);
 
 	// Clean up
 
+	while(global_counter.load() != 0)
+	{
+		Sleep(1);
+	}
 
-return 0;
+
+return 1;
 }
 
 }

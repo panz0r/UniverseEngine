@@ -1,8 +1,10 @@
 #pragma once
 
 #include <malloc.h>
-#include "job_declaration.h"
 #include <atomic>
+
+#include "job_declaration.h"
+#include "threading.h"
 
 namespace em 
 {
@@ -26,7 +28,7 @@ public:
 	{
 		size_t job_decl_size = sizeof(JobQueueEntry);
 		_buffer = (JobQueueEntry*)_aligned_malloc(job_decl_size*size, 64);
-		unlock(); // initialize lock
+		
 	}
 
 	void enqueue(JobDeclaration* job, Counter* counter)
@@ -34,6 +36,9 @@ public:
 		JobQueueEntry& entry = _buffer[_write_head];
 		entry.declaration = job;
 		entry.counter = counter;
+		if(_write_head >= _read_head) { assert((_write_head + 1) % _size != _read_head); }
+		if(_write_head < _read_head) { assert((_write_head + 1) % _size != _read_head); }
+
 		_write_head = (_write_head + 1) % _size;
 	}
 
@@ -49,15 +54,14 @@ public:
 		return true;
 	}
 
-	void lock()
+	inline void lock()
 	{
-		bool val = false;
-		while(!_lock.compare_exchange_weak(val, true, std::memory_order_acquire));
+		fiber_lock(&_lock);
 	}
 	
-	void unlock()
+	inline void unlock()
 	{
-		_lock.store(false, std::memory_order_release);
+		fiber_unlock(&_lock);
 	}
 
 private:

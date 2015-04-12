@@ -12,8 +12,8 @@ namespace em
 WaitList::WaitList(unsigned backlog_size)
 : _backlog_size(backlog_size)
 {
-	size_t size = sizeof(WaitEntry) * backlog_size;
-	_waiting_fibers = (WaitEntry*)_aligned_malloc(size, 64);
+	size_t size = sizeof(WaitEntry);
+	_waiting_fibers = (WaitEntry*)_aligned_malloc(size*backlog_size, 64);
 	memset(_waiting_fibers, 0, size*backlog_size);
 }
 
@@ -25,7 +25,7 @@ void WaitList::insert(Counter* counter)
 {
 	for(unsigned i = 0; i < _backlog_size; ++i)
 	{
-		if(_waiting_fibers[i].counter = NULL) {
+		if(_waiting_fibers[i].counter == NULL) {
 			_waiting_fibers[i].counter = counter;
 			_waiting_fibers[i].fiber_handle = GetCurrentFiber();
 			return;
