@@ -39,23 +39,23 @@ namespace internal
 		JobDeclaration* job_decl = NULL;
 		Counter* counter = NULL;
 		while (job_decl == NULL) {
-			g_jobQueues[PRIORITY_HIGH]->lock();
-			g_jobQueues[PRIORITY_HIGH]->dequeue(&job_decl, &counter);
-			g_jobQueues[PRIORITY_HIGH]->unlock();
+			//g_jobQueues[PRIORITY_HIGH]->lock();
+			//g_jobQueues[PRIORITY_HIGH]->dequeue(&job_decl, &counter);
+			//g_jobQueues[PRIORITY_HIGH]->unlock();
 
-			if (job_decl != NULL)
-				break;
+			//if (job_decl != NULL)
+			//	break;
 
 			g_jobQueues[PRIORITY_NORMAL]->lock();
 			g_jobQueues[PRIORITY_NORMAL]->dequeue(&job_decl, &counter);
 			g_jobQueues[PRIORITY_NORMAL]->unlock();
 
-			if (job_decl != NULL)
-				break;
+			//if (job_decl != NULL)
+			//	break;
 
-			g_jobQueues[PRIORITY_LOW]->lock();
-			g_jobQueues[PRIORITY_LOW]->dequeue(&job_decl, &counter);
-			g_jobQueues[PRIORITY_LOW]->unlock();
+			//g_jobQueues[PRIORITY_LOW]->lock();
+			//g_jobQueues[PRIORITY_LOW]->dequeue(&job_decl, &counter);
+			//g_jobQueues[PRIORITY_LOW]->unlock();
 		}
 
 		*out_job_decl = job_decl;
@@ -83,7 +83,7 @@ void initialize_fiber_system()
 	internal::g_jobQueues[PRIORITY_LOW] = new JobQueue(100);
 	internal::g_fiberPool = new FiberPool(128,32);
 	internal::g_waitList = new WaitList(160);
-	internal::g_counterPool = new CounterPool(100);
+	internal::g_counterPool = new CounterPool(1000);
 }
 
 void schedule_jobs(JobDeclaration* job_decls, int count, Counter** counter, unsigned priority)
@@ -100,6 +100,14 @@ void schedule_jobs(JobDeclaration* job_decls, int count, Counter** counter, unsi
 void do_work()
 {
 
+	JobDeclaration* job_decl = NULL;
+	Counter* next_counter = NULL;
+	internal::get_next_job(&job_decl, &next_counter);
+	Fiber* fiber = internal::get_fiber(job_decl, next_counter);
+
+	DEBUG_FIBER_SWITCH("counter, job", fiber->fiber_handle);
+	assert(fiber->fiber_handle != GetCurrentFiber() && "trying to switch to same fiber!");
+	SwitchToFiber(fiber->fiber_handle);
 }
 
 void wait_for_counter(Counter* counter)
@@ -140,12 +148,12 @@ void wait_for_counter(Counter* counter)
 void release_fiber(Fiber* fiber)
 {
 	DEBUG_FIBER_RELASE(fiber->fiber_handle);
-	fiber->counter->decrease();
 	internal::g_fiberPool->lock();
+	fiber->counter->decrease();
 	fiber->func = NULL;
 	fiber->params = NULL;
 	fiber->counter = NULL;
-	fiber->cooldown = 5;
+	fiber->cooldown.store(5, std::memory_order_release);
 	internal::g_fiberPool->unlock();
 }
 

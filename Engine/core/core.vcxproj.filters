@@ -34,6 +34,7 @@
     <ClInclude Include="thread\fiber_system.h">
       <Filter>thread</Filter>
     </ClInclude>
+    <ClInclude Include="thread\atomic_spin_lock.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="thread\fiber_pool.cpp">

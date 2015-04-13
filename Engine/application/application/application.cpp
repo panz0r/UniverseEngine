@@ -10,6 +10,7 @@ namespace em
 {
 
 std::atomic<int> global_counter;
+std::atomic<int> global_counter2;
 
 Application::Application()
 {}
@@ -35,6 +36,8 @@ void test_job(void* params)
 	
 	const unsigned n_jobs = 200;
 	JobDeclaration jobs[n_jobs];
+	size_t ets_stack_size = sizeof(jobs);
+
 	for(unsigned i = 0; i < n_jobs; ++i)
 	{
 		jobs[i] = JobDeclaration(&test_sub_job, NULL);
@@ -53,6 +56,11 @@ DWORD WINAPI thread_entry_job(void* params)
 	JobDeclaration job = JobDeclaration(&test_job, NULL);
 	Counter* counter = NULL;
 	schedule_jobs(&job, 1, &counter);
+	
+	global_counter2--;
+
+	while(global_counter2.load() > 0) { ; }
+	
 	wait_for_counter(counter);
 
 
@@ -73,6 +81,7 @@ int Application::run()
 	//_scheduler.enqueue(&render, HIGH_PRIORITY);
 
 	global_counter.store(4);
+	global_counter2.store(4);
 
 	create_worker_thread(thread_entry_job, 1<<0);
 	create_worker_thread(thread_entry_job, 1<<1);

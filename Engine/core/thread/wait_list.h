@@ -1,7 +1,7 @@
 #pragma once
 
 #include <atomic>
-#include "threading.h"
+#include "atomic_spin_lock.h"
 
 namespace em
 {
@@ -27,18 +27,17 @@ public:
 
 	inline void lock()
 	{
-		fiber_lock(&_lock);
+		atomic_lock(_lock);
 	}
 
 	inline void unlock()
 	{
-		fiber_unlock(&_lock);
+		atomic_unlock(_lock);
 	}
-
 private:
+	spin_lock_t _lock;
 
 	unsigned _backlog_size;
-	std::atomic<bool> _lock;
 	WaitEntry* _waiting_fibers;
 
 };

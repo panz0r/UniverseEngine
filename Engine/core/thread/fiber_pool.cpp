@@ -17,7 +17,8 @@ namespace em
 void CALLBACK internal_fiber_proc(void* fiber_params)
 {
 	Fiber* fiber = (Fiber*)fiber_params;
-	while(true) {
+	bool have_work = true;
+	while(have_work) {
 		HANDLE current_fiber = GetCurrentFiber();
 		//if(fiber->func == NULL)
 		//{
@@ -31,6 +32,8 @@ void CALLBACK internal_fiber_proc(void* fiber_params)
 		// fiber func is done here
 		release_fiber(fiber);
 		switch_fiber();
+
+		//switch_fiber();
 		assert(fiber->func != NULL && "invalid fiber function! ");
 	}
 }
@@ -63,7 +66,7 @@ FiberPool::~FiberPool()
 Fiber* FiberPool::get_fiber(unsigned type)
 {
 	for(unsigned i = 0; i < _fiber_count[type]; ++i) {
-		if(_fibers[type][i].func == NULL && --_fibers[type][i].cooldown <= 0) {
+		if(_fibers[type][i].cooldown.fetch_sub(1, std::memory_order_acquire) <= 0 && _fibers[type][i].func == NULL) {
 			return &_fibers[type][i];
 		}
 	}

@@ -4,7 +4,7 @@
 #include <atomic>
 
 #include "job_declaration.h"
-#include "threading.h"
+#include "atomic_spin_lock.h"
 
 namespace em 
 {
@@ -28,7 +28,6 @@ public:
 	{
 		size_t job_decl_size = sizeof(JobQueueEntry);
 		_buffer = (JobQueueEntry*)_aligned_malloc(job_decl_size*size, 64);
-		
 	}
 
 	void enqueue(JobDeclaration* job, Counter* counter)
@@ -56,17 +55,15 @@ public:
 
 	inline void lock()
 	{
-		fiber_lock(&_lock);
-	}
-	
-	inline void unlock()
-	{
-		fiber_unlock(&_lock);
+		atomic_lock(_lock);
 	}
 
+	inline void unlock()
+	{
+		atomic_unlock(_lock);
+	}
 private:
-	
-	std::atomic<bool> _lock;
+	spin_lock_t _lock;
 	unsigned _size;
 	unsigned _read_head;
 	unsigned _write_head;
