@@ -14,7 +14,7 @@ struct Fiber
 	void* fiber_handle;
 	JobFunc func;
 	Counter* counter;
-	std::atomic<int> cooldown;
+	//std::atomic<int> cooldown;
 	
 };
 

@@ -28,7 +28,7 @@ void test_sub_job(void* data)
 	// Do some shit
 	int apa = 1;
 	int palle = 2;
-
+	Sleep(rand()%3);
 }
 
 void test_job(void* params)
