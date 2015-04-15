@@ -14,31 +14,6 @@
 namespace em
 {
 
-void CALLBACK internal_fiber_proc(void* fiber_params)
-{
-	unlock_fiber_pool();
-	Fiber* fiber = (Fiber*)fiber_params;
-	bool have_work = true;
-	while(have_work) {
-		
-		//if(fiber->func == NULL)
-		//{
-		//	char tmp_buffer[128];
-		//	sprintf(tmp_buffer, "(%d): fiber: %08x, handle: %08x, cooldown: %d\n", GetCurrentThreadId(), GetCurrentFiber(), fiber->fiber_handle, fiber->cooldown);
-		//	OutputDebugString(tmp_buffer);
-		//}
-		
-		if(fiber->func != NULL)
-			fiber->func(fiber->params);
-
-		// fiber func is done here
-		//release_fiber(fiber);
-		switch_fiber_and_release(fiber);
-
-		
-		
-	}
-}
 
 
 FiberPool::FiberPool(unsigned small_fiber_count, unsigned large_fiber_count)
@@ -52,12 +27,12 @@ FiberPool::FiberPool(unsigned small_fiber_count, unsigned large_fiber_count)
 
 	for(unsigned i = 0; i < small_fiber_count; ++i)
 	{
-		_fibers[SMALL_STACK][i].fiber_handle = CreateFiber(SMALL_FIBER_STACK_SIZE, &internal_fiber_proc, &_fibers[SMALL_STACK][i]);
+		_fibers[SMALL_STACK][i].fiber_handle = CreateFiber(SMALL_FIBER_STACK_SIZE, &internal::fiber_proc, &_fibers[SMALL_STACK][i]);
 	}
 
 	for (unsigned i = 0; i < large_fiber_count; ++i)
 	{
-		_fibers[LARGE_STACK][i].fiber_handle = CreateFiber(SMALL_FIBER_STACK_SIZE, &internal_fiber_proc, &_fibers[LARGE_STACK][i]);
+		_fibers[LARGE_STACK][i].fiber_handle = CreateFiber(SMALL_FIBER_STACK_SIZE, &internal::fiber_proc, &_fibers[LARGE_STACK][i]);
 	}
 }
 

@@ -3,7 +3,6 @@
 namespace em
 {
 
-struct JobParams;
 class Counter;
 
 typedef void (*JobFunc)(void* params);
@@ -14,8 +13,6 @@ struct Fiber
 	void* fiber_handle;
 	JobFunc func;
 	Counter* counter;
-	//std::atomic<int> cooldown;
-	
 };
 
 }
