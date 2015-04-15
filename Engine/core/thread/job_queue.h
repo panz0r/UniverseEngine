@@ -9,12 +9,12 @@
 namespace em 
 {
 
-__declspec(align(64)) struct JobQueueEntry
+/*__declspec(align(64))*/ struct JobQueueEntry
 {
 	JobDeclaration* declaration;
 	Counter* counter;
 
-	char padding[64 - sizeof(void*)*2];
+	//char padding[64 - sizeof(void*)*2];
 };
 
 class JobQueue

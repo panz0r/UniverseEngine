@@ -43,7 +43,7 @@ FiberPool::~FiberPool()
 Fiber* FiberPool::get_fiber(unsigned type)
 {
 	for(unsigned i = 0; i < _fiber_count[type]; ++i) {
-		if(_fibers[type][i].func == NULL) {
+		if(_fibers[type][i].in_use == false) {
 			return &_fibers[type][i];
 		}
 	}

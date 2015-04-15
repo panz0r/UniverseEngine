@@ -3,14 +3,12 @@
 #include <core/thread/threading.h>
 #include <core/thread/fiber_system.h>
 #include <core/thread/job_declaration.h>
+#include <core/thread/counter.h>
 
 #include <atomic>
 
 namespace em
 {
-
-std::atomic<int> global_counter;
-std::atomic<int> global_counter2;
 
 Application::Application()
 {}
@@ -23,24 +21,35 @@ void Application::initialize()
 	initialize_fiber_system();
 }
 
+
+// Make sure some time is spent here
+#pragma optimize("", off)
 void test_sub_job(void* data)
 {
 	// Do some shit
-	int apa = 1;
-	int palle = 2;
-	Sleep(rand()%3);
+	int apa = 0;
+	for(int i = 0; i < 1000000; ++i)
+	{
+		apa++;
+	}
+	
+	//int apa = 1;
+	//int palle = apa;
+	//Sleep(rand()%3);
 }
+#pragma optimize("", on)
+
 
 void test_job(void* params)
 {
 	
-	const unsigned n_jobs = 200;
+	const unsigned n_jobs = 4900;
 	JobDeclaration jobs[n_jobs];
 	size_t ets_stack_size = sizeof(jobs);
-
+	int arne = 0;
 	for(unsigned i = 0; i < n_jobs; ++i)
 	{
-		jobs[i] = JobDeclaration(&test_sub_job, NULL);
+		jobs[i] = JobDeclaration(&test_sub_job, &arne);
 	}
 
 	Counter* counter = NULL;
@@ -49,23 +58,16 @@ void test_job(void* params)
 }
 
 
-DWORD WINAPI thread_entry_job(void* params)
+DWORD WINAPI worker_thread(void* params)
 {
-	Fiber* this_fiber = convert_thread_to_fiber(params);
+	convert_thread_to_fiber(params);
 
-	JobDeclaration job = JobDeclaration(&test_job, NULL);
-	Counter* counter = NULL;
-	schedule_jobs(&job, 1, &counter);
-	
-	global_counter2--;
-
-	while(global_counter2.load() > 0) { ; }
-	
-	wait_for_counter(counter);
-
+	while(true)
+	{
+		do_work();
+	}
 
 	ConvertFiberToThread();
-	global_counter--;
 	return 0;
 }
 
@@ -80,28 +82,26 @@ int Application::run()
 	//_scheduler.enqueue(&game_update, HIGH_PRIORITY);
 	//_scheduler.enqueue(&render, HIGH_PRIORITY);
 
-	global_counter.store(4);
-	global_counter2.store(4);
-
-	create_worker_thread(thread_entry_job, 1<<0);
-	create_worker_thread(thread_entry_job, 1<<1);
-	create_worker_thread(thread_entry_job, 1<<2);
-	create_worker_thread(thread_entry_job, 1<<3);
-	//create_worker_thread(thread_entry_job, 1<<4);
-	//create_worker_thread(thread_entry_job, 1<<5);
-
-
+	create_worker_thread(worker_thread, 1<<0);
+	create_worker_thread(worker_thread, 1<<1);
+	create_worker_thread(worker_thread, 1<<2);
+	create_worker_thread(worker_thread, 1<<3);
+	create_worker_thread(worker_thread, 1<<4);
+	create_worker_thread(worker_thread, 1<<5);
+	create_worker_thread(worker_thread, 1<<6);
+	create_worker_thread(worker_thread, 1<<7);
 	
-	// Wait for all work to be done
-	//wait_for_signal(&_signal);
+	//create_worker_thread(worker_thread, 1<<5);
+	//create_worker_thread(worker_thread, 1<<6);
 
-	// Clean up
+	JobDeclaration job = JobDeclaration(&test_job, NULL);
+	Counter* counter = NULL;
+	schedule_jobs(&job, 1, &counter);
 
-	while(global_counter.load() != 0)
+	while(!counter->is_zero())
 	{
 		Sleep(1);
 	}
-
 
 return 1;
 }

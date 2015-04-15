@@ -21,13 +21,13 @@ WaitList::~WaitList()
 {
 }
 
-void WaitList::insert(Counter* counter)
+void WaitList::insert(Counter* counter, void* fiber_handle)
 {
 	for(unsigned i = 0; i < _backlog_size; ++i)
 	{
 		if(_waiting_fibers[i].counter == NULL) {
 			_waiting_fibers[i].counter = counter;
-			_waiting_fibers[i].fiber_handle = GetCurrentFiber();
+			_waiting_fibers[i].fiber_handle = fiber_handle;
 			return;
 		}
 	}
@@ -35,7 +35,7 @@ void WaitList::insert(Counter* counter)
 	assert(false && "wait list is full");
 }
 
-WaitEntry* WaitList::get_next_ready_fiber()
+WaitEntry* WaitList::get_ready_fiber()
 {
 	for (unsigned i = 0; i < _backlog_size; ++i)
 	{

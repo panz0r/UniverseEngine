@@ -8,7 +8,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-#define FIBER_DEBUG
+//#define FIBER_DEBUG
 #if defined(FIBER_DEBUG)
 #define DEBUG_FIBER_SWITCH(tag, fiber) \
 	char temp_buffer[128]; \
@@ -70,20 +70,29 @@ done:
 	{
 		
 		Fiber* fiber = g_fiberPool->get_fiber(SMALL_STACK);
-		fiber->func = job_decl->_job_function;
-		fiber->params = job_decl->_job_params;
-		fiber->counter = counter;
-		
+		fiber->in_use = true;
+		if(job_decl != NULL)
+		{
+			fiber->func = job_decl->_job_function;
+			fiber->params = job_decl->_job_params;
+			fiber->counter = counter;
+		}
+
 		return fiber;
 	}
 	
-	inline void release_fiber(Fiber* fiber)
+	inline void decrease_counter(Fiber* fiber)
 	{
 		if(fiber->counter != NULL)
 			fiber->counter->decrease();
+	}
+
+	inline void release_fiber(Fiber* fiber)
+	{
 		fiber->func = NULL;
 		fiber->params = NULL;
 		fiber->counter = NULL;
+		fiber->in_use = false;
 	}
 
 	void switch_fiber_and_release(Fiber* fiber)
@@ -91,7 +100,7 @@ done:
 		void* next_fiber = NULL;
 	
 		LOCK(g_waitList);
-		WaitEntry* waiting_fiber = g_waitList->get_next_ready_fiber();
+		WaitEntry* waiting_fiber = g_waitList->get_ready_fiber();
 		if (waiting_fiber)
 		{
 			next_fiber = waiting_fiber->fiber_handle;
@@ -107,6 +116,7 @@ done:
 				DEBUG_FIBER_SWITCH("switch, waiting", next_fiber);
 
 				LOCK(g_fiberPool);
+				decrease_counter(fiber);
 				release_fiber(fiber);
 				SwitchToFiber(next_fiber);
 			} else
@@ -119,22 +129,15 @@ done:
 
 		JobDeclaration* job_decl = NULL;
 		Counter* counter = NULL;
-		if(get_next_job(&job_decl, &counter))
-		{
-			LOCK(g_fiberPool);
-			release_fiber(fiber);
-			fiber->func = job_decl->_job_function;
-			fiber->params = job_decl->_job_params;
-			fiber->counter = counter;
-		}
-		else
-		{
-			LOCK(g_fiberPool);
-			release_fiber(fiber);
-		}
-	
+		get_next_job(&job_decl, &counter);
+
+		LOCK(g_fiberPool);
+		decrease_counter(fiber);
+		fiber->func = job_decl != NULL ? job_decl->_job_function : NULL;
+		fiber->params = job_decl != NULL ? job_decl->_job_params : NULL;
+		fiber->counter = counter;
 		UNLOCK(g_fiberPool);
-		DEBUG_FIBER_SWITCH("no switch, new job", fiber->fiber_handle);
+		
 	}
 
 
@@ -160,7 +163,7 @@ done:
 void initialize_fiber_system()
 {
 	internal::g_jobQueues[PRIORITY_HIGH] = new JobQueue(100);
-	internal::g_jobQueues[PRIORITY_NORMAL] = new JobQueue(1000);
+	internal::g_jobQueues[PRIORITY_NORMAL] = new JobQueue(5000);
 	internal::g_jobQueues[PRIORITY_LOW] = new JobQueue(100);
 	internal::g_fiberPool = new FiberPool(128,32);
 	internal::g_waitList = new WaitList(160);
@@ -180,48 +183,66 @@ void schedule_jobs(JobDeclaration* job_decls, int count, Counter** counter, unsi
 
 void do_work()
 {
-}
-
-void wait_for_counter(Counter* counter)
-{
-	void* next_fiber = NULL;
-
+	// get pending waiting fiber that is ready to be rescheduled
 	LOCK(internal::g_waitList);
-	internal::g_waitList->insert(counter);
-	WaitEntry* waiting_fiber = internal::g_waitList->get_next_ready_fiber();
-	if (waiting_fiber)
+	void* waiting_fiber_handle = NULL;
+	WaitEntry* waiting_fiber = internal::g_waitList->get_ready_fiber();
+	if (waiting_fiber) 
 	{
-		next_fiber = waiting_fiber->fiber_handle;
+		waiting_fiber_handle = waiting_fiber->fiber_handle;
 		waiting_fiber->fiber_handle = NULL;
 		waiting_fiber->counter = NULL;
 	}
 	UNLOCK(internal::g_waitList);
 
-	if (next_fiber != NULL)
+	if(waiting_fiber_handle != NULL) 
 	{
-		if(next_fiber != GetCurrentFiber()) {
-			DEBUG_FIBER_SWITCH("counter, waiting", next_fiber);
+		if(waiting_fiber_handle != GetCurrentFiber())
+		{
 			LOCK(internal::g_fiberPool);
-			SwitchToFiber(next_fiber);
-			
-		} else {
-			DEBUG_FIBER_SWITCH("counter, waiting no switch", GetCurrentFiber());
+			SwitchToFiber(waiting_fiber_handle);
 		}
 		UNLOCK(internal::g_fiberPool);
 		return;
 	}
 
+	// Attempt to get a job for the job queue and pair it with a fiber
 	JobDeclaration* job_decl = NULL;
 	Counter* next_counter = NULL;
-	while(!internal::get_next_job(&job_decl, &next_counter)) {;}
+	if(internal::get_next_job(&job_decl, &next_counter))
+	{
+		LOCK(internal::g_fiberPool);
+		Fiber* fiber = internal::get_fiber(job_decl, next_counter);
+
+		DEBUG_FIBER_SWITCH("counter, job", fiber->fiber_handle);
+		SwitchToFiber(fiber->fiber_handle);
+
+		UNLOCK(internal::g_fiberPool);
+	}
+
+}
+
+void wait_for_counter(Counter* counter)
+{
 	
+	JobDeclaration* job_decl = NULL;
+	Counter* next_counter = NULL;
+	internal::get_next_job(&job_decl, &next_counter);
 	LOCK(internal::g_fiberPool);
 	Fiber* fiber = internal::get_fiber(job_decl, next_counter);
-
 	DEBUG_FIBER_SWITCH("counter, job", fiber->fiber_handle);
 	assert(fiber->fiber_handle != GetCurrentFiber() && "trying to switch to same fiber!");
-	SwitchToFiber(fiber->fiber_handle);
 
+	// Note to self. This can be a source of crashes. 
+	// All jobs this fiber depends on could theoretically
+	// complete before this fiber is switched out
+	// resulting in a possible switch-in of the same fiber
+	// from another fiber. chance of this happening is tiny, but Murphy says it will happen.
+	LOCK(internal::g_waitList);
+	internal::g_waitList->insert(counter, GetCurrentFiber());
+	UNLOCK(internal::g_waitList);
+
+	SwitchToFiber(fiber->fiber_handle);
 	UNLOCK(internal::g_fiberPool);
 }
 

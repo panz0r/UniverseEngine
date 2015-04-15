@@ -8,7 +8,7 @@ namespace em
 
 class Counter;
 
-__declspec(align(64)) struct WaitEntry
+/*__declspec(align(64)) */struct WaitEntry
 {
 	void* fiber_handle;
 	Counter* counter;
@@ -22,8 +22,8 @@ public:
 	WaitList(unsigned backlog_size);
 	~WaitList();
 
-	void insert(Counter* counter);
-	WaitEntry* get_next_ready_fiber(); // TODO, priority
+	void insert(Counter* counter, void* fiber_handle);
+	WaitEntry* get_ready_fiber(); // TODO, priority
 
 	inline void lock()
 	{
