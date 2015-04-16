@@ -7,7 +7,7 @@ namespace ue
 class Application
 {
 public:
-	Application();
+	Application(void* window_handle);
 	~Application();
 
 	void initialize();
@@ -15,7 +15,7 @@ public:
 
 private:
 
-
+	void* _window_handle;
 };
 
 

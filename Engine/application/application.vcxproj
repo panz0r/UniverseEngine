@@ -28,6 +28,9 @@
     <ProjectReference Include="..\core\core.vcxproj">
       <Project>{b0c87c07-2fa9-4965-8e05-7f02fe58d1de}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\renderer_d3d11\renderer_d3d11.vcxproj">
+      <Project>{f048f851-1348-47b2-b96c-ac3ad6b89d2c}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C5D15D01-68B1-4D1F-9E0D-879BD36DC4D2}</ProjectGuid>

@@ -5,10 +5,13 @@
 #include <core/thread/job_declaration.h>
 #include <core/thread/counter.h>
 
+#include <renderer_d3d11/renderer/render_device.h>
+
 namespace ue
 {
 
-Application::Application()
+Application::Application(void* window_handle)
+: _window_handle(window_handle)
 {}
 
 Application::~Application()
@@ -17,6 +20,8 @@ Application::~Application()
 void Application::initialize()
 {
 	initialize_fiber_system();
+
+	D3D11RenderDevice* device = new D3D11RenderDevice((HWND)_window_handle, 1024, 768);
 }
 
 
@@ -30,10 +35,6 @@ void test_sub_job(void* data)
 	{
 		apa++;
 	}
-	
-	//int apa = 1;
-	//int palle = apa;
-	//Sleep(rand()%3);
 }
 
 void test_sub_job_2(void* data)
@@ -44,10 +45,6 @@ void test_sub_job_2(void* data)
 	{
 		apa++;
 	}
-
-	//int apa = 1;
-	//int palle = apa;
-	//Sleep(rand()%3);
 }
 
 #pragma optimize("", on)
@@ -87,14 +84,6 @@ DECLARE_THREAD worker_thread(void* params)
 
 int Application::run()
 {
-
-	
-	// Queue up system jobs
-	//_scheduler.enqueue(&thread_entry_job, PRIORITY_NORMAL);
-	//_scheduler.enqueue(&thread_entry_job, PRIORITY_NORMAL);
-	//_scheduler.enqueue(&game_update, HIGH_PRIORITY);
-	//_scheduler.enqueue(&render, HIGH_PRIORITY);
-
 	create_worker_thread(worker_thread, 1<<0);
 	create_worker_thread(worker_thread, 1<<1);
 	create_worker_thread(worker_thread, 1<<2);
@@ -103,9 +92,6 @@ int Application::run()
 	create_worker_thread(worker_thread, 1<<5);
 	create_worker_thread(worker_thread, 1<<6);
 	create_worker_thread(worker_thread, 1<<7);
-	
-	//create_worker_thread(worker_thread, 1<<5);
-	//create_worker_thread(worker_thread, 1<<6);
 
 	JobDeclaration job = JobDeclaration(&test_job, NULL);
 	Counter* counter = NULL;
