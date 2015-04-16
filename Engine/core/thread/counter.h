@@ -1,7 +1,7 @@
 
 #include "atomic_spin_lock.h"
 
-namespace em
+namespace ue
 {
 
 class Counter

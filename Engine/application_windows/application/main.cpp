@@ -39,7 +39,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine, 
 	application::ShowWindow(window_handle);
 
 	
-	em::Application* application = new em::Application();
+	ue::Application* application = new ue::Application();
 	application->initialize();
 
 

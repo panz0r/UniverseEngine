@@ -3,10 +3,6 @@
 #include "counter.h"
 #include "wait_list.h"
 #include "fiber_pool.h"
-#include "fiber.h"
-
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
 
 //#define FIBER_DEBUG
 #if defined(FIBER_DEBUG)
@@ -24,7 +20,7 @@
 #define DEBUG_FIBER_SWITCH(tag, fiber)
 #define DEBUG_FIBER_RELASE(fiber)
 #endif
-namespace em
+namespace ue
 {
 
 namespace internal
@@ -97,28 +93,29 @@ done:
 
 	void switch_fiber_and_release(Fiber* fiber)
 	{
-		void* next_fiber = NULL;
+		
 	
 		LOCK(g_waitList);
+		void* waiting_fiber_handle = NULL;
 		WaitEntry* waiting_fiber = g_waitList->get_ready_fiber();
 		if (waiting_fiber)
 		{
-			next_fiber = waiting_fiber->fiber_handle;
+			waiting_fiber_handle = waiting_fiber->fiber_handle;
 			waiting_fiber->fiber_handle = NULL;
 			waiting_fiber->counter = NULL;
 		}
 		UNLOCK(g_waitList);
 
-		if (next_fiber != NULL)
+		if (waiting_fiber_handle != NULL)
 		{
-			if (next_fiber != GetCurrentFiber()) {
+			if (waiting_fiber_handle != GetCurrentFiber()) {
 				
 				DEBUG_FIBER_SWITCH("switch, waiting", next_fiber);
 
 				LOCK(g_fiberPool);
 				decrease_counter(fiber);
 				release_fiber(fiber);
-				SwitchToFiber(next_fiber);
+				switch_to_fiber(waiting_fiber_handle);
 			} else
 			{
 				DEBUG_FIBER_SWITCH("switch, waiting no switch", GetCurrentFiber());
@@ -200,7 +197,7 @@ void do_work()
 		if(waiting_fiber_handle != GetCurrentFiber())
 		{
 			LOCK(internal::g_fiberPool);
-			SwitchToFiber(waiting_fiber_handle);
+			switch_to_fiber(waiting_fiber_handle);
 		}
 		UNLOCK(internal::g_fiberPool);
 		return;
@@ -215,7 +212,7 @@ void do_work()
 		Fiber* fiber = internal::get_fiber(job_decl, next_counter);
 
 		DEBUG_FIBER_SWITCH("counter, job", fiber->fiber_handle);
-		SwitchToFiber(fiber->fiber_handle);
+		switch_to_fiber(fiber->fiber_handle);
 
 		UNLOCK(internal::g_fiberPool);
 	}
@@ -242,7 +239,7 @@ void wait_for_counter(Counter* counter)
 	internal::g_waitList->insert(counter, GetCurrentFiber());
 	UNLOCK(internal::g_waitList);
 
-	SwitchToFiber(fiber->fiber_handle);
+	switch_to_fiber(fiber->fiber_handle);
 	UNLOCK(internal::g_fiberPool);
 }
 

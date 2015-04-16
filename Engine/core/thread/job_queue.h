@@ -1,12 +1,11 @@
 #pragma once
 
 #include <malloc.h>
-#include <atomic>
 
 #include "job_declaration.h"
 #include "atomic_spin_lock.h"
 
-namespace em 
+namespace ue 
 {
 
 /*__declspec(align(64))*/ struct JobQueueEntry

@@ -1,9 +1,8 @@
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include "fiber.h"
 
-namespace em
+namespace ue
 {
 
 namespace internal

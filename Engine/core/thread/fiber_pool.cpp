@@ -1,20 +1,15 @@
 #include "fiber_pool.h"
-#include "fiber.h"
 #include "fiber_system.h"
 
 //////////////////////////////////////////////////////////////////////////
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
 
 #include <malloc.h>
 
 #define SMALL_FIBER_STACK_SIZE 1024*1024
 #define LARGE_FIBER_STACK_SIZE 512*1024
 
-namespace em
+namespace ue
 {
-
-
 
 FiberPool::FiberPool(unsigned small_fiber_count, unsigned large_fiber_count)
 {
@@ -27,7 +22,7 @@ FiberPool::FiberPool(unsigned small_fiber_count, unsigned large_fiber_count)
 
 	for(unsigned i = 0; i < small_fiber_count; ++i)
 	{
-		_fibers[SMALL_STACK][i].fiber_handle = CreateFiber(SMALL_FIBER_STACK_SIZE, &internal::fiber_proc, &_fibers[SMALL_STACK][i]);
+		_fibers[SMALL_STACK][i].fiber_handle = create_fiber(SMALL_FIBER_STACK_SIZE, &internal::fiber_proc, &_fibers[SMALL_STACK][i]);
 	}
 
 	for (unsigned i = 0; i < large_fiber_count; ++i)

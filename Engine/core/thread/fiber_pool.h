@@ -1,9 +1,8 @@
 #pragma once
 
-#include <atomic>
 #include "atomic_spin_lock.h"
 
-namespace em
+namespace ue
 {
 
 struct Fiber;

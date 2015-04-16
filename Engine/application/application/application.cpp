@@ -1,13 +1,11 @@
 #include "application.h"
 
-#include <core/thread/threading.h>
+#include <core/thread/thread.h>
 #include <core/thread/fiber_system.h>
 #include <core/thread/job_declaration.h>
 #include <core/thread/counter.h>
 
-#include <atomic>
-
-namespace em
+namespace ue
 {
 
 Application::Application()
@@ -58,7 +56,7 @@ void test_job(void* params)
 }
 
 
-DWORD WINAPI worker_thread(void* params)
+DECLARE_THREAD worker_thread(void* params)
 {
 	convert_thread_to_fiber(params);
 
@@ -67,7 +65,7 @@ DWORD WINAPI worker_thread(void* params)
 		do_work();
 	}
 
-	ConvertFiberToThread();
+	convert_fiber_to_thread();
 	return 0;
 }
 

@@ -15,9 +15,6 @@
     <ClInclude Include="thread\worker_thread.h">
       <Filter>thread</Filter>
     </ClInclude>
-    <ClInclude Include="thread\threading.h">
-      <Filter>thread</Filter>
-    </ClInclude>
     <ClInclude Include="thread\wait_list.h">
       <Filter>thread</Filter>
     </ClInclude>
@@ -35,15 +32,17 @@
       <Filter>thread</Filter>
     </ClInclude>
     <ClInclude Include="thread\atomic_spin_lock.h" />
+    <ClInclude Include="thread\win32\fiber_win32.h" />
+    <ClInclude Include="thread\win32\thread_win32.h" />
+    <ClInclude Include="thread\thread.h">
+      <Filter>thread</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="thread\fiber_pool.cpp">
       <Filter>thread</Filter>
     </ClCompile>
     <ClCompile Include="thread\wait_list.cpp">
-      <Filter>thread</Filter>
-    </ClCompile>
-    <ClCompile Include="thread\threading.cpp">
       <Filter>thread</Filter>
     </ClCompile>
     <ClCompile Include="thread\fiber_system.cpp">
