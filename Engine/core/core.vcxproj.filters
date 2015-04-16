@@ -12,9 +12,6 @@
     <ClInclude Include="thread\fiber_pool.h">
       <Filter>thread</Filter>
     </ClInclude>
-    <ClInclude Include="thread\worker_thread.h">
-      <Filter>thread</Filter>
-    </ClInclude>
     <ClInclude Include="thread\wait_list.h">
       <Filter>thread</Filter>
     </ClInclude>

@@ -108,7 +108,7 @@ done:
 
 		if (waiting_fiber_handle != NULL)
 		{
-			if (waiting_fiber_handle != GetCurrentFiber()) {
+			if (waiting_fiber_handle != get_current_fiber()) {
 				
 				DEBUG_FIBER_SWITCH("switch, waiting", next_fiber);
 
@@ -194,7 +194,7 @@ void do_work()
 
 	if(waiting_fiber_handle != NULL) 
 	{
-		if(waiting_fiber_handle != GetCurrentFiber())
+		if(waiting_fiber_handle != get_current_fiber())
 		{
 			LOCK(internal::g_fiberPool);
 			switch_to_fiber(waiting_fiber_handle);

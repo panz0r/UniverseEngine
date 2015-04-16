@@ -35,6 +35,21 @@ void test_sub_job(void* data)
 	//int palle = apa;
 	//Sleep(rand()%3);
 }
+
+void test_sub_job_2(void* data)
+{
+	// Do some shit
+	int apa = 0;
+	for (int i = 0; i < 2000000; ++i)
+	{
+		apa++;
+	}
+
+	//int apa = 1;
+	//int palle = apa;
+	//Sleep(rand()%3);
+}
+
 #pragma optimize("", on)
 
 
@@ -47,7 +62,7 @@ void test_job(void* params)
 	int arne = 0;
 	for(unsigned i = 0; i < n_jobs; ++i)
 	{
-		jobs[i] = JobDeclaration(&test_sub_job, &arne);
+		jobs[i] = JobDeclaration(rand()%10 > 8 ? &test_sub_job : &test_sub_job_2, &arne);
 	}
 
 	Counter* counter = NULL;

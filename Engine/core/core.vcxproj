@@ -30,7 +30,6 @@
     <ClInclude Include="thread\wait_list.h" />
     <ClInclude Include="thread\win32\fiber_win32.h" />
     <ClInclude Include="thread\win32\thread_win32.h" />
-    <ClInclude Include="thread\worker_thread.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="thread\fiber_pool.cpp" />
