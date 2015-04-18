@@ -14,6 +14,8 @@ public:
 	D3D11RenderDevice(HWND window_handle, unsigned width, unsigned height);
 	~D3D11RenderDevice();
 
+	ID3D11DeviceContext* context() { return _immediate_context; }
+
 private:
 	ID3D11Device* _device;
 	ID3D11DeviceContext* _immediate_context;

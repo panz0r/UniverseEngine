@@ -19,9 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="renderer\render_context.h" />
     <ClInclude Include="renderer\render_device.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="renderer\render_context.cpp" />
     <ClCompile Include="renderer\render_device.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

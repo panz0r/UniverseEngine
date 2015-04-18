@@ -6,6 +6,7 @@
 #include <core/thread/counter.h>
 
 #include <renderer_d3d11/renderer/render_device.h>
+#include <renderer_d3d11/renderer/render_context.h>
 
 namespace ue
 {
@@ -22,6 +23,11 @@ void Application::initialize()
 	initialize_fiber_system();
 
 	D3D11RenderDevice* device = new D3D11RenderDevice((HWND)_window_handle, 1024, 768);
+	D3D11RenderContext* context = new D3D11RenderContext(device->context());
+
+	unsigned states = rand();
+
+	context->drawcall(states);
 }
 
 
