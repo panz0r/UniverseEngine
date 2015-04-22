@@ -1,4 +1,6 @@
 #include "render_context.h"
+#include "render_resource_manager.h"
+#include "compiled_drawcall.h"
 
 #define DIRTY(mask, state) (mask & (1<<state))
 
@@ -14,37 +16,81 @@ D3D11RenderContext::~D3D11RenderContext()
 {
 }
 
-
-void D3D11RenderContext::drawcall(statemask_t dirty_mask)
+void D3D11RenderContext::dispatch()
 {
+	RenderCommand* cmd;
+	while(command_stream.get(&cmd))
+	{
+		switch(cmd->type)
+		{
+			case RenderCommandType::DrawCall:
+			{
+				drawcall((DrawCallCommand*)cmd);
+			} break;
+
+		}
+	}
+}
+
+void D3D11RenderContext::collect_resources(unsigned resource_count, const RenderResource* resources, unsigned* states)
+{
+	D3D11ResourceManager* resource_manager = _resource_manager;
+	for(unsigned i = 0; i < resource_count; ++i)
+	{
+		const RenderResource& resource = resources[i];
+		switch(resource.type)
+		{
+			case ResourceType::DepthStencilState:
+			{
+
+				//resource_manager->get_depth_stencil_state(resource.handle, )
+			}
+		}
+	}
+}
+
+void D3D11RenderContext::drawcall(DrawCallCommand* cmd)
+{
+	unsigned dirty_mask;
+
+	//collect_resources(cmd, )
+
+	D3D11CompiledDrawCall* compiled = _resource_manager->get_cached_drawcall(cmd->drawcall_hash);
+
+	if(compiled == NULL)
+	{
+		
+	}
+
 	if(DIRTY(dirty_mask, DepthStencilState))
-		_context->OMSetDepthStencilState(NULL, 0);
+		_context->OMSetDepthStencilState(compiled->depth_stencil_state, *compiled->stencil_ref);
 	if(DIRTY(dirty_mask, BlendState))
-		_context->OMSetBlendState(NULL, NULL, 0);
+		_context->OMSetBlendState(compiled->blend_state, compiled->blend_factor, *compiled->sample_mask);
 	if(DIRTY(dirty_mask, RasterizerState))		
-		_context->RSSetState(NULL);
-	if(DIRTY(dirty_mask, ViewPort))
-		_context->RSSetViewports(0, NULL);
-	if(DIRTY(dirty_mask, Scissors))
-		_context->RSSetScissorRects(0, NULL);
+		_context->RSSetState(compiled->rasterizer_state);
+	//if(DIRTY(dirty_mask, ViewPort))
+	//	_context->RSSetViewports(0, NULL);
+	//if(DIRTY(dirty_mask, Scissors))
+	//	_context->RSSetScissorRects(0, NULL);
 
 	if(DIRTY(dirty_mask, VSShader))
-		_context->VSSetShader(NULL, NULL, 0);
+		_context->VSSetShader(compiled->vertex_shader, NULL, 0);
 	if(DIRTY(dirty_mask, VSSamplers))
-		_context->VSSetSamplers(0, 0, NULL);
+		_context->VSSetSamplers(*compiled->vs_samplers_start_slot, *compiled->vs_samplers_count, compiled->vs_samplers);
 	if(DIRTY(dirty_mask, VSResources))
-		_context->VSSetShaderResources(0, 0, NULL);
+		_context->VSSetShaderResources(*compiled->vs_resource_start_slot, *compiled->vs_resource_count, compiled->vs_shader_resource_views);
 	if(DIRTY(dirty_mask, VSCBuffers))
-		_context->VSSetConstantBuffers(0, 0, NULL);
+		_context->VSSetConstantBuffers(*compiled->vs_cb_start_slot, *compiled->vs_cb_count, compiled->vs_constant_buffers);
 
 	if (DIRTY(dirty_mask, PSShader))
-		_context->PSSetShader(NULL, NULL, 0);
+		_context->PSSetShader(compiled->pixel_shader, NULL, 0);
 	if (DIRTY(dirty_mask, PSSamplers))
-		_context->PSSetSamplers(0, 0, NULL);
+		_context->PSSetSamplers(*compiled->ps_samplers_start_slot, *compiled->ps_samplers_count, compiled->ps_samplers);
 	if (DIRTY(dirty_mask, PSResources))
-		_context->PSSetShaderResources(0, 0, NULL);
+		_context->PSSetShaderResources(*compiled->ps_resource_start_slot, *compiled->ps_resource_count, compiled->ps_shader_resource_views);
 	if (DIRTY(dirty_mask, PSCBuffers))
-		_context->PSSetConstantBuffers(0, 0, NULL);
+		_context->PSSetConstantBuffers(*compiled->ps_cb_start_slot, *compiled->ps_cb_count, compiled->ps_constant_buffers);
+
 
 	if (DIRTY(dirty_mask, GSShader))
 		_context->GSSetShader(NULL, NULL, 0);
@@ -74,16 +120,19 @@ void D3D11RenderContext::drawcall(statemask_t dirty_mask)
 		_context->DSSetConstantBuffers(0, 0, NULL);
 	
 	if (DIRTY(dirty_mask, InputLayout))
-		_context->IASetInputLayout(NULL);
-	if (DIRTY(dirty_mask, PrimitiveTopology))
-		_context->IASetPrimitiveTopology((D3D11_PRIMITIVE_TOPOLOGY)0);
+		_context->IASetInputLayout(compiled->input_layout);
 	if (DIRTY(dirty_mask, IndexBuffer))
-		_context->IASetIndexBuffer(NULL, (DXGI_FORMAT)0, 0);
+		_context->IASetIndexBuffer(compiled->index_buffer, *compiled->index_format, *compiled->index_offset);
 	if (DIRTY(dirty_mask, VertexBuffers))
-		_context->IASetVertexBuffers(0, 0, NULL, NULL, NULL);
+		_context->IASetVertexBuffers(*compiled->vb_start_slot, *compiled->vb_count, compiled->vb_buffers, compiled->vb_strides, compiled->vb_offsets);
 
-	_context->DrawIndexed(0, 0, 0);
-	_context->DrawIndexedInstanced(0, 0, 0, 0, 0);
+	if (DIRTY(dirty_mask, PrimitiveTopology))
+		_context->IASetPrimitiveTopology(compiled->primitive_topology);
+
+	if(compiled->draw_call_type == DrawCallType::Indexed)
+		_context->DrawIndexed(compiled->index_count, compiled->start_index_location, compiled->base_vertex_location);
+	else if(compiled->draw_call_type == DrawCallType::Instanced)
+		_context->DrawIndexedInstanced(compiled->index_count, compiled->instance_count, compiled->start_index_location, compiled->base_vertex_location, compiled->instance_count);
 }
 
 void D3D11RenderContext::compute()
@@ -97,14 +146,14 @@ void D3D11RenderContext::compute()
 }
 
 
-statemask_t D3D11RenderContext::compute_drawcall_dirty_mask(const unsigned* drawcall_states)
+StateMask D3D11RenderContext::generate_drawcall_dirty_mask(const unsigned* drawcall_states)
 {
-	statemask_t dirty_mask = 0;
+	StateMask dirty_mask = 0;
 	for(unsigned i = 0; i < DrawCallStatesCount; ++i)
 	{
 		if(drawcall_states[i] != _drawcall_states[i])
 		{
-			dirty_mask |= ((statemask_t)1<<i);
+			dirty_mask |= ((StateMask)1<<i);
 			_drawcall_states[i] = drawcall_states[i];
 		}
 	}

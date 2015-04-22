@@ -1,57 +1,18 @@
 #pragma once
 
+#include "render_command.h"
+
 #include <d3d11.h>
+
 
 namespace ue
 {
 
+struct RenderResource;
+class D3D11ResourceManager;
 
-typedef unsigned statemask_t;
 
-
-enum DrawCallStates
-{
-	DepthStencilState,
-	BlendState,
-	RasterizerState,
-	ViewPort,
-	Scissors,
-
-	VSShader,
-	VSSamplers,
-	VSResources,
-	VSCBuffers,
-
-	PSShader,
-	PSSamplers,
-	PSResources,
-	PSCBuffers,
-
-	InputLayout,
-	PrimitiveTopology,
-	IndexBuffer,
-	VertexBuffers,
-
-	// Extended states
-	GSShader,
-	GSSamplers,
-	GSResources,
-	GSCBuffers,
-
-	DSShader,
-	DSSamplers,
-	DSResources,
-	DSCBuffers,
-
-	HSShader,
-	HSSamplers,
-	HSResources,
-	HSCBuffers,
-
-	DrawCallStatesCount,
-
-};
-
+typedef unsigned StateMask;
 
 class D3D11RenderContext
 {
@@ -59,14 +20,18 @@ public:
 	D3D11RenderContext(ID3D11DeviceContext* context);
 	~D3D11RenderContext();
 	
-	void drawcall(statemask_t dirty_mask);
+	void dispatch();
+
+	void drawcall(DrawCallCommand* cmd);
 	void compute();
 
 private:
-	statemask_t compute_drawcall_dirty_mask(const unsigned* drawcall_states);
+	void collect_resources(unsigned resource_count, const RenderResource* resource_handles);
+	StateMask generate_drawcall_dirty_mask(const unsigned* drawcall_states);
 
 	unsigned _drawcall_states[DrawCallStatesCount];
 	ID3D11DeviceContext* _context;
+	D3D11ResourceManager* _resource_manager;
 };
 
 

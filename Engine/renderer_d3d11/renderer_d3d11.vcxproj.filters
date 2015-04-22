@@ -12,6 +12,15 @@
     <ClInclude Include="renderer\render_context.h">
       <Filter>renderer</Filter>
     </ClInclude>
+    <ClInclude Include="renderer\render_command.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\compiled_drawcall.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\render_resource_manager.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="renderer\render_device.cpp">
