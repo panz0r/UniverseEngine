@@ -14,6 +14,15 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "application", "application\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "renderer_d3d11", "renderer_d3d11\renderer_d3d11.vcxproj", "{F048F851-1348-47B2-B96C-AC3AD6B89D2C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "math", "math\math.vcxproj", "{78B3BBE3-E704-4044-A458-D4CEF6761565}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "raytracer", "raytracer\raytracer.vcxproj", "{CFE3F32C-39DB-499D-A7B2-E3786709E9CC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E007D169-6E60-4371-9187-AB9A01E464BC}"
+	ProjectSection(SolutionItems) = preProject
+		Performance1.psess = Performance1.psess
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -72,8 +81,31 @@ Global
 		{F048F851-1348-47B2-B96C-AC3AD6B89D2C}.Release|Win32.Build.0 = Release|Win32
 		{F048F851-1348-47B2-B96C-AC3AD6B89D2C}.Release|x64.ActiveCfg = Release|x64
 		{F048F851-1348-47B2-B96C-AC3AD6B89D2C}.Release|x64.Build.0 = Release|x64
+		{78B3BBE3-E704-4044-A458-D4CEF6761565}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{78B3BBE3-E704-4044-A458-D4CEF6761565}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{78B3BBE3-E704-4044-A458-D4CEF6761565}.Debug|Win32.ActiveCfg = Debug|Win32
+		{78B3BBE3-E704-4044-A458-D4CEF6761565}.Debug|Win32.Build.0 = Debug|Win32
+		{78B3BBE3-E704-4044-A458-D4CEF6761565}.Debug|x64.ActiveCfg = Debug|Win32
+		{78B3BBE3-E704-4044-A458-D4CEF6761565}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{78B3BBE3-E704-4044-A458-D4CEF6761565}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{78B3BBE3-E704-4044-A458-D4CEF6761565}.Release|Win32.ActiveCfg = Release|Win32
+		{78B3BBE3-E704-4044-A458-D4CEF6761565}.Release|Win32.Build.0 = Release|Win32
+		{78B3BBE3-E704-4044-A458-D4CEF6761565}.Release|x64.ActiveCfg = Release|Win32
+		{CFE3F32C-39DB-499D-A7B2-E3786709E9CC}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{CFE3F32C-39DB-499D-A7B2-E3786709E9CC}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{CFE3F32C-39DB-499D-A7B2-E3786709E9CC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CFE3F32C-39DB-499D-A7B2-E3786709E9CC}.Debug|Win32.Build.0 = Debug|Win32
+		{CFE3F32C-39DB-499D-A7B2-E3786709E9CC}.Debug|x64.ActiveCfg = Debug|Win32
+		{CFE3F32C-39DB-499D-A7B2-E3786709E9CC}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{CFE3F32C-39DB-499D-A7B2-E3786709E9CC}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{CFE3F32C-39DB-499D-A7B2-E3786709E9CC}.Release|Win32.ActiveCfg = Release|Win32
+		{CFE3F32C-39DB-499D-A7B2-E3786709E9CC}.Release|Win32.Build.0 = Release|Win32
+		{CFE3F32C-39DB-499D-A7B2-E3786709E9CC}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

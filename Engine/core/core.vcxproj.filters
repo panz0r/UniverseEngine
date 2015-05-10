@@ -9,22 +9,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="thread\fiber_pool.h">
-      <Filter>thread</Filter>
-    </ClInclude>
-    <ClInclude Include="thread\wait_list.h">
-      <Filter>thread</Filter>
-    </ClInclude>
     <ClInclude Include="thread\fiber.h">
-      <Filter>thread</Filter>
-    </ClInclude>
-    <ClInclude Include="thread\job_queue.h">
       <Filter>thread</Filter>
     </ClInclude>
     <ClInclude Include="thread\job_declaration.h">
       <Filter>thread</Filter>
     </ClInclude>
-    <ClInclude Include="thread\counter.h" />
     <ClInclude Include="thread\fiber_system.h">
       <Filter>thread</Filter>
     </ClInclude>
@@ -34,16 +24,16 @@
     <ClInclude Include="thread\thread.h">
       <Filter>thread</Filter>
     </ClInclude>
+    <ClInclude Include="handle\handle.h" />
+    <ClInclude Include="handle\handle_container.h" />
+    <ClInclude Include="assert\assert.h" />
+    <ClInclude Include="platform\platform.h" />
+    <ClInclude Include="platform\win32\platform_win32.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="thread\fiber_pool.cpp">
-      <Filter>thread</Filter>
-    </ClCompile>
-    <ClCompile Include="thread\wait_list.cpp">
-      <Filter>thread</Filter>
-    </ClCompile>
     <ClCompile Include="thread\fiber_system.cpp">
       <Filter>thread</Filter>
     </ClCompile>
+    <ClCompile Include="thread\win32\fiber_win32.cpp" />
   </ItemGroup>
 </Project>

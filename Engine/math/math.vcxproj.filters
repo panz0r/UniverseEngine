@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="hash.cpp" />
+    <ClCompile Include="math.cpp" />
+    <ClCompile Include="math_types.cpp" />
+    <ClCompile Include="random.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="hash.h" />
+    <ClInclude Include="math.h" />
+    <ClInclude Include="math_types.h" />
+    <ClInclude Include="matrix3.h" />
+    <ClInclude Include="matrix4.h" />
+    <ClInclude Include="plane.h" />
+    <ClInclude Include="random.h" />
+    <ClInclude Include="ray.h" />
+    <ClInclude Include="sphere.h" />
+    <ClInclude Include="vector2.h" />
+    <ClInclude Include="vector3.h" />
+    <ClInclude Include="vector4.h" />
+    <ClInclude Include="xmatrix.h" />
+    <ClInclude Include="xplane.h" />
+    <ClInclude Include="xray.h" />
+    <ClInclude Include="xsphere.h" />
+    <ClInclude Include="xvector.h" />
+    <ClInclude Include="sse\sse.h">
+      <Filter>sse</Filter>
+    </ClInclude>
+    <ClInclude Include="ref\ref.h">
+      <Filter>ref</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="matrix3.inl" />
+    <None Include="matrix4.inl" />
+    <None Include="plane.inl" />
+    <None Include="random.inl" />
+    <None Include="ray.inl" />
+    <None Include="sphere.inl" />
+    <None Include="vector2.inl" />
+    <None Include="vector3.inl" />
+    <None Include="vector4.inl" />
+    <None Include="sse\xmatrix.inl">
+      <Filter>sse</Filter>
+    </None>
+    <None Include="sse\xplane.inl">
+      <Filter>sse</Filter>
+    </None>
+    <None Include="sse\xray.inl">
+      <Filter>sse</Filter>
+    </None>
+    <None Include="sse\xsphere.inl">
+      <Filter>sse</Filter>
+    </None>
+    <None Include="sse\xvector.inl">
+      <Filter>sse</Filter>
+    </None>
+    <None Include="ref\xmatrix.inl">
+      <Filter>ref</Filter>
+    </None>
+    <None Include="ref\xvector.inl">
+      <Filter>ref</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="ref">
+      <UniqueIdentifier>{b2fae398-aaf7-44e4-9627-88eeb5a4b918}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sse">
+      <UniqueIdentifier>{f8c3677c-c91d-4eda-aec9-d811670e62b3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

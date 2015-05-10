@@ -1,6 +1,7 @@
 #pragma once
 
 #include "render_command.h"
+#include "drawcall_states.h"
 
 #include <d3d11.h>
 
@@ -26,10 +27,9 @@ public:
 	void compute();
 
 private:
-	void collect_resources(unsigned resource_count, const RenderResource* resource_handles);
-	StateMask generate_drawcall_dirty_mask(const unsigned* drawcall_states);
+	StateMask generate_drawcall_dirty_mask(const unsigned* drawcall_states, unsigned count);
 
-	unsigned _drawcall_states[DrawCallStatesCount];
+	unsigned _drawcall_states[ExtendedDrawCallStateCount];
 	ID3D11DeviceContext* _context;
 	D3D11ResourceManager* _resource_manager;
 };

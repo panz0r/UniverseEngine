@@ -1,6 +1,7 @@
 #pragma once
 
 
+
 namespace ue
 {
 
@@ -16,6 +17,7 @@ public:
 private:
 
 	void* _window_handle;
+	
 };
 
 

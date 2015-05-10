@@ -19,22 +19,22 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="assert\assert.h" />
+    <ClInclude Include="handle\handle.h" />
+    <ClInclude Include="handle\handle_container.h" />
+    <ClInclude Include="platform\platform.h" />
+    <ClInclude Include="platform\win32\platform_win32.h" />
     <ClInclude Include="thread\atomic_spin_lock.h" />
-    <ClInclude Include="thread\counter.h" />
     <ClInclude Include="thread\fiber.h" />
-    <ClInclude Include="thread\fiber_pool.h" />
     <ClInclude Include="thread\job_declaration.h" />
-    <ClInclude Include="thread\job_queue.h" />
     <ClInclude Include="thread\fiber_system.h" />
     <ClInclude Include="thread\thread.h" />
-    <ClInclude Include="thread\wait_list.h" />
     <ClInclude Include="thread\win32\fiber_win32.h" />
     <ClInclude Include="thread\win32\thread_win32.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="thread\fiber_pool.cpp" />
     <ClCompile Include="thread\fiber_system.cpp" />
-    <ClCompile Include="thread\wait_list.cpp" />
+    <ClCompile Include="thread\win32\fiber_win32.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B0C87C07-2FA9-4965-8E05-7F02FE58D1DE}</ProjectGuid>

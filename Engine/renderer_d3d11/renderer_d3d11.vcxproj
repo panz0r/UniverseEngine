@@ -19,15 +19,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="renderer\compiled_drawcall.h" />
+    <ClInclude Include="renderer\drawcall_states.h" />
     <ClInclude Include="renderer\render_command.h" />
     <ClInclude Include="renderer\render_context.h" />
     <ClInclude Include="renderer\render_device.h" />
-    <ClInclude Include="renderer\render_resource_manager.h" />
+    <ClInclude Include="resource\render_atom.h" />
+    <ClInclude Include="resource\render_resource_manager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="renderer\render_context.cpp" />
     <ClCompile Include="renderer\render_device.cpp" />
+    <ClCompile Include="resource\render_resource_manager.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F048F851-1348-47B2-B96C-AC3AD6B89D2C}</ProjectGuid>

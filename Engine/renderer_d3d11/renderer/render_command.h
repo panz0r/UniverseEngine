@@ -1,5 +1,7 @@
 #pragma once
 
+#include <core/handle/handle.h>
+
 namespace ue
 {
 
@@ -19,7 +21,7 @@ struct DrawCallCommand
 {
 	RenderCommand base;
 
-	unsigned drawcall_hash;
+	Handle atom_handle;
 
 };
 

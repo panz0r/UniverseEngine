@@ -4,6 +4,9 @@
     <Filter Include="renderer">
       <UniqueIdentifier>{24bd1cae-97b4-4875-84b7-c9bf078ff6e6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="resource">
+      <UniqueIdentifier>{fb04e7d2-5cbc-47c7-9292-8c2d851c8df9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="renderer\render_device.h">
@@ -15,10 +18,13 @@
     <ClInclude Include="renderer\render_command.h">
       <Filter>renderer</Filter>
     </ClInclude>
-    <ClInclude Include="renderer\compiled_drawcall.h">
-      <Filter>renderer</Filter>
+    <ClInclude Include="resource\render_resource_manager.h">
+      <Filter>resource</Filter>
     </ClInclude>
-    <ClInclude Include="renderer\render_resource_manager.h">
+    <ClInclude Include="resource\render_atom.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\drawcall_states.h">
       <Filter>renderer</Filter>
     </ClInclude>
   </ItemGroup>
@@ -28,6 +34,9 @@
     </ClCompile>
     <ClCompile Include="renderer\render_context.cpp">
       <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\render_resource_manager.cpp">
+      <Filter>resource</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
