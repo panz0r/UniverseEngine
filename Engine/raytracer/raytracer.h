@@ -1,5 +1,7 @@
 #pragma once
 
+#include <core/thread/fiber_system.h>
+
 namespace ue
 {
 
@@ -9,7 +11,6 @@ struct RaytraceParams
 	char* pixels;
 };
 
-void start_job(void *params);
-
+DECLARE_JOB(start_job);
 
 }

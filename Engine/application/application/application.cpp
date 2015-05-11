@@ -8,6 +8,8 @@
 
 #include <raytracer/raytracer.h>
 
+#include <core/thread/fiber_system.h>
+
 namespace ue
 {
 
@@ -20,7 +22,6 @@ Application::~Application()
 
 void Application::initialize()
 {
-	_fiber_system = new FiberSystem(8, 1000);
 	
 	//D3D11RenderDevice* device = new D3D11RenderDevice((HWND)_window_handle, 1024, 768);
 	//D3D11RenderContext* context = new D3D11RenderContext(device->context());
@@ -32,8 +33,13 @@ void Application::initialize()
 
 int Application::run()
 {
-	unsigned width = 256;
-	unsigned height = 256;
+	FiberSystemParams* fiber_system_params = new FiberSystemParams();
+	FiberSystem &fiber_system = fiber_system_params->_fiber_system;
+
+	fiber_system.initialize(fiber_system_params, 8, 1000);
+
+	unsigned width = 1024;
+	unsigned height = 1024;
 	char* pixels = new char[width*height*3];
 
 	RaytraceParams params;
@@ -42,13 +48,12 @@ int Application::run()
 	Job raytrace_job = Job(start_job, &params);
 
 	//JobDeclaration job = JobDeclaration(&test_job, NULL);
-	Counter* counter = NULL;
-	Counter counter = schedule_jobs(&raytrace_job, 1, &counter);
 
-	while(!counter->is_zero())
-	{
-		Sleep(1);
-	}
+	Counter counter = fiber_system.schedule_jobs(&raytrace_job, 1);
+	fiber_system.wait_for_counter(counter, 0);
+
+	fiber_system.quit();
+
 
 return 1;
 }

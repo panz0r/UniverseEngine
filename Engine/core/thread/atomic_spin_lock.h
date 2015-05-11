@@ -6,25 +6,27 @@ namespace ue
 {
 
 
-struct spin_lock_t
+struct AtomicSpinLock
 {
-	spin_lock_t() 
+	AtomicSpinLock() 
 	{
 		_locked.clear();
 	}
+
+	inline void lock() {
+		while (_locked.test_and_set(std::memory_order_acquire)) {}
+	}
+
+	inline bool try_lock() {
+		return !_locked.test_and_set(std::memory_order_acquire);
+	}
+
+	inline void unlock() {
+		_locked.clear(std::memory_order_release);
+	}
+
 	std::atomic_flag _locked;
 };
-
-inline void atomic_lock(spin_lock_t& lock)
-{
-	
-	while(lock._locked.test_and_set(std::memory_order_acquire)) { ; }
-}
-
-inline void atomic_unlock(spin_lock_t& lock)
-{
-	lock._locked.clear(std::memory_order_release);
-}
 
 
 }

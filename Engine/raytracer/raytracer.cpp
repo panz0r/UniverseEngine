@@ -88,7 +88,7 @@ void tile_job(FiberSystem *fiber_system, void *params)
 		}
 	}
 	Counter counter = fiber_system->schedule_jobs(ray_jobs, ray_count);
-	fiber_system->wait_for_counter(counter, ray_count);
+	fiber_system->wait_for_counter(counter, 0);
 }
 
 
@@ -100,7 +100,7 @@ struct ScanlineParams
 	Camera* camera;
 };
 
-void start_job(FiberSystem *fiber_system, void *params)
+DECLARE_JOB (start_job)
 {
 	RaytraceParams* raytrace_params = (RaytraceParams*)params;
 		
@@ -142,7 +142,7 @@ void start_job(FiberSystem *fiber_system, void *params)
 
 	
 	Counter counter = fiber_system->schedule_jobs(tile_jobs, tiles_x*tiles_y);
-	fiber_system->wait_for_counter(counter, tiles_x*tiles_y);
+	fiber_system->wait_for_counter(counter, 0);
 	
 
 }
