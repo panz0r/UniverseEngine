@@ -36,7 +36,7 @@ int Application::run()
 	FiberSystemParams* fiber_system_params = new FiberSystemParams();
 	FiberSystem &fiber_system = fiber_system_params->_fiber_system;
 
-	fiber_system.initialize(fiber_system_params, 8, 1000);
+	fiber_system.initialize(fiber_system_params, 8, 1024);
 
 	unsigned width = 1024;
 	unsigned height = 1024;

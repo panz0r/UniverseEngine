@@ -72,8 +72,13 @@ void tile_job(FiberSystem *fiber_system, void *params)
 	TileParams *p = (TileParams*)params;
 
 	unsigned ray_count = p->tile_width*p->tile_height;
-	Job *ray_jobs = new Job[ray_count];
-	RayParams *ray_params = new RayParams[ray_count];
+
+	size_t required_size = sizeof(Job) * 1024 + sizeof(RayParams) * 1024;
+
+	//Job ray_jobs[32*32];
+	RayParams ray_params[32*32];
+	//Job *ray_jobs = new Job[ray_count];
+	//RayParams *ray_params = new RayParams[ray_count];
 	
 	for(unsigned y = 0; y < p->tile_height; ++y) {
 		for(unsigned x = 0; x < p->tile_width; ++x) {
@@ -84,11 +89,13 @@ void tile_job(FiberSystem *fiber_system, void *params)
 			p->camera->GenerateRay(p_x, p_y, &ray);
 			ray_params[index].spheres = p->spheres;
 			ray_params[index].ray = ray;
-			ray_jobs[index] = Job(ray_job, &ray_params[index]);
+			//ray_jobs[index] = Job(ray_job, &ray_params[index]);
 		}
 	}
-	Counter counter = fiber_system->schedule_jobs(ray_jobs, ray_count);
-	fiber_system->wait_for_counter(counter, 0);
+
+	for(unsigned i = 0; i < 32*32; ++i) {
+		ray_job(fiber_system, &ray_params[i]);
+	}
 }
 
 
@@ -125,6 +132,8 @@ DECLARE_JOB (start_job)
 
 	Job *tile_jobs = new Job[tiles_x * tiles_y];
 	TileParams *tile_params = new TileParams[tiles_x * tiles_y];
+
+	size_t required_size = sizeof(Job) * 1024 + sizeof(TileParams) * 1024;
 	
 	for(unsigned y = 0; y < tiles_y; ++y) {
 		for(unsigned x = 0; x < tiles_x; ++x) {

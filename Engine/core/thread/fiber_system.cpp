@@ -47,7 +47,7 @@ FiberSystem::~FiberSystem()
 void FiberSystem::initialize(FiberSystemParams *fiber_system_params, unsigned thread_count, unsigned fiber_pool_count)
 {
 	_thread_count = thread_count;
-	const unsigned fiber_stack_size = 512 * 1024;
+	const unsigned fiber_stack_size = 128 * 1024;
 	for (unsigned i = 0; i < fiber_pool_count; ++i) {
 		_fiber_pool.enqueue( create_fiber(fiber_stack_size, FiberFunction, fiber_system_params) );
 	}
@@ -197,7 +197,7 @@ void __stdcall FiberSystem::FiberFunction(void *params)
 			job_bundle.counter->fetch_sub(1);
 		}
 		else {
-			SwitchToThread();	// yield for os threads
+			//SwitchToThread();	// yield for os threads
 		}
 
 
