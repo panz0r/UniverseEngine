@@ -29,11 +29,13 @@
     <ClInclude Include="assert\assert.h" />
     <ClInclude Include="platform\platform.h" />
     <ClInclude Include="platform\win32\platform_win32.h" />
+    <ClInclude Include="collection\array.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="thread\fiber_system.cpp">
       <Filter>thread</Filter>
     </ClCompile>
     <ClCompile Include="thread\win32\fiber_win32.cpp" />
+    <ClCompile Include="platform\win32\platform_win32.cpp" />
   </ItemGroup>
 </Project>

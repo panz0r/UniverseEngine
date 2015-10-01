@@ -1,7 +1,6 @@
 #pragma once
 
 #include <d3d11.h>
-#include "render_atom.h"
 #include <core/handle/handle_container.h>
 
 

@@ -5,6 +5,8 @@
 namespace ue
 {
 
+class D3D12RenderDevice;
+
 class Application
 {
 public:
@@ -17,7 +19,7 @@ public:
 private:
 
 	void* _window_handle;
-	
+	D3D12RenderDevice *_render_device;
 };
 
 

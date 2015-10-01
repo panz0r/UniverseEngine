@@ -99,15 +99,15 @@ public:
 		return clamp<T>(iValue, (T)0, (T)1);
 	}
 
-	inline static float abs(float iValue)
-	{
-		return ::fabs(iValue);
-	}
+	//inline static float abs(float iValue)
+	//{
+	//	return ::fabs(iValue);
+	//}
 
-	inline static double abs(double iValue)
-	{
-		return ::abs(iValue);
-	}
+	//inline static double abs(double iValue)
+	//{
+	//	return ::abs(iValue);
+	//}
 
 	template <typename T>
 	inline static T smoothstep(T iEdge0, T iEdge1, T iAmount)

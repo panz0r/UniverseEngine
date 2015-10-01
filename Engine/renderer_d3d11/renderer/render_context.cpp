@@ -1,6 +1,6 @@
 #include "render_context.h"
 #include <renderer_d3d11/resource/render_resource_manager.h>
-#include <renderer_d3d11/resource/render_atom.h>
+
 
 
 #define DIRTY(mask, state) (mask & (1<<state))

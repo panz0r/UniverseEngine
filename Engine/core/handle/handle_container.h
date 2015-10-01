@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/assert/assert.h>
+#include <core/collection/array.h>
 #include "handle.h"
 
 #if !defined(FALSE)
@@ -14,7 +15,6 @@
 namespace ue
 {
 
-template <unsigned MAX_HANDLE_COUNT>
 class HandleContainer
 {
 public:
@@ -26,10 +26,12 @@ public:
 	Handle add(void* ptr, unsigned type)
 	{
 		unsigned index = _next_free_index;
-		UEASSERT(index < MAX_HANDLE_COUNT && "out of handles");
+		if (index >= _handles.size()) {
+			grow(_handles.size() + 10);
+		}
+		
 		HandleEntry& entry = _handles[index];
 		UEASSERT(entry._in_use == FALSE && "handle in use");
-		UEASSERT(entry._end_of_list == FALSE && "out of handles");
 		_next_free_index = entry._next_free_index;
 
 		Handle handle = Handle(index, type, entry._counter);
@@ -65,27 +67,22 @@ public:
 private:
 	struct HandleEntry
 	{
-		HandleEntry() : _next_free_index(0), _counter(0), _in_use(0), _end_of_list(0), _data(0) {}
-		explicit HandleEntry(unsigned next_free_index) : _next_free_index(next_free_index), _counter(0), _in_use(0), _end_of_list(0), _data(0) {}
+		HandleEntry() : _next_free_index(0), _counter(0), _in_use(0),  _data(0) {}
+		explicit HandleEntry(unsigned next_free_index) : _next_free_index(next_free_index), _counter(0), _in_use(0), _data(0) {}
 
 		unsigned _next_free_index:INDEX_BITS;
 		unsigned _counter:COUNTER_BITS;
 		unsigned _in_use:1;
-		unsigned _end_of_list:1;
 		void* _data;
 	};
 
-	inline void initialize()
+	inline void grow(unsigned new_size)
 	{
-		_next_free_index = 0;
-		_use_count = 0;
-		for (unsigned i = 0; i < MAX_HANDLE_COUNT - 1; ++i)
-		{
+		unsigned old_size = _handles.size();
+		_handles.resize(new_size);
+		for (unsigned i = old_size; i < new_size; ++i) {
 			_handles[i] = HandleEntry(i + 1);
 		}
-
-		_handles[MAX_HANDLE_COUNT - 1] = HandleEntry();
-		_handles[MAX_HANDLE_COUNT - 1]._end_of_list = TRUE;
 	}
 
 	inline bool get_ptr(Handle handle, void** ptr)
@@ -100,7 +97,7 @@ private:
 		return true;
 	}
 
-	HandleEntry _handles[MAX_HANDLE_COUNT];
+	Array<HandleEntry> _handles;
 	unsigned _next_free_index;
 	unsigned _use_count;
 };
