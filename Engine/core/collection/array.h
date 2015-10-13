@@ -14,8 +14,12 @@ public:
 
 public:
 	Array() : _ptr(nullptr), _size(0), _capacity(0) {}
-	// wtf is this?
-	Array(const Array<T>& other) : _ptr(other._ptr), _size(other._size), _capacity(other._capacity) {}
+	// wtf is this shit?
+	Array(const Array<T>& other)  
+	{
+		grow(other.size);
+	}
+
 	Array(unsigned capacity) : _ptr(nullptr), _size(0), _capacity(0)
 	{
 		reserve(capacity);
@@ -45,10 +49,10 @@ public:
 			grow(size);
 		_size = size;
 	}
-	void push_back(const reference item) {
-		if (_size + 1 > _capacity)
-			grow(_size*2 + 10);
-		pointer ptr = back();
+	void push_back(const T& item) {
+		if (_size >= _capacity)
+			grow(_size/2 + 1);
+		auto ptr = back();
 		memcpy(ptr, &item, item_size);
 		_size++;
 	}

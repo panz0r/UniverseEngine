@@ -21,7 +21,10 @@
   <ItemGroup>
     <ClInclude Include="com\com_ptr.h" />
     <ClInclude Include="d3dx12.h" />
+    <ClInclude Include="memory\buddy_allocator.h" />
+    <ClInclude Include="memory\first_fit_allocator.h" />
     <ClInclude Include="renderer\command_list_factory.h" />
+    <ClInclude Include="renderer\descriptor_heap.h" />
     <ClInclude Include="renderer\descriptor_heap_factory.h" />
     <ClInclude Include="renderer\render_atom.h" />
     <ClInclude Include="renderer\render_context.h" />
@@ -32,6 +35,7 @@
     <ClInclude Include="renderer\resource_manager.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="memory\first_fit_allocator.cpp" />
     <ClCompile Include="renderer\command_list_factory.cpp" />
     <ClCompile Include="renderer\descriptor_heap_factory.cpp" />
     <ClCompile Include="renderer\render_atom.cpp" />

@@ -7,6 +7,9 @@
     <Filter Include="com">
       <UniqueIdentifier>{108673f7-4c34-4785-acd4-8e7c88ed91f1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="memory">
+      <UniqueIdentifier>{b3ef4089-9008-4f6a-b915-38147a8906a6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="renderer\render_device.h">
@@ -42,6 +45,15 @@
     <ClInclude Include="renderer\descriptor_heap_factory.h">
       <Filter>renderer</Filter>
     </ClInclude>
+    <ClInclude Include="renderer\descriptor_heap.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\first_fit_allocator.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\buddy_allocator.h">
+      <Filter>memory</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="renderer\render_device.cpp">
@@ -64,6 +76,9 @@
     </ClCompile>
     <ClCompile Include="renderer\render_atom.cpp">
       <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="memory\first_fit_allocator.cpp">
+      <Filter>memory</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

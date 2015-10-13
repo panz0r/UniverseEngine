@@ -2,11 +2,20 @@
 
 #include <d3d12.h>
 #include "d3dx12.h"
+#include <core/assert/assert.h>
+#include <core/handle/handle_container.h>
 #include <renderer_d3d12/com/com_ptr.h>
+#include "descriptor_heap.h"
 #include <vector>
 
 namespace ue
 {
+
+enum ResourceType
+{
+	Texture,
+	VertexBuffer
+};
 
 struct TextureDesc
 {
@@ -17,6 +26,11 @@ struct TextureDesc
 	unsigned format;
 	unsigned dimension;
 	bool dynamic;
+};
+
+struct VertexBufferDesc
+{
+
 };
 
 // Resources, and what's needed in runtime
@@ -30,8 +44,10 @@ struct TextureResource : public RenderResource
 {
 	ComPtr<ID3D12Resource> resource;
 	
+	DescriptorHeapHandle *handles;
 	D3D12_CPU_DESCRIPTOR_HANDLE *srv;
 	D3D12_CPU_DESCRIPTOR_HANDLE *uav;
+
 	void *mapped_data;
 	size_t size;
 	bool dynamic;
@@ -62,6 +78,13 @@ struct ConstantBuffer
 
 struct StaticBuffer
 {
+	ID3D12Resource *resource;
+	D3D12_CPU_DESCRIPTOR_HANDLE *srv;
+	D3D12_CPU_DESCRIPTOR_HANDLE *uav;
+	D3D12_VERTEX_BUFFER_VIEW *vbv;
+	D3D12_INDEX_BUFFER_VIEW *ibv;
+	void *mapped_data;
+
 	// srv/uav/vbv/ibv
 	// mapped data
 	// stride
@@ -77,7 +100,8 @@ struct DynamicBuffer
 };
 
 
-typedef unsigned RenderHandle;
+
+typedef Handle RenderHandle;
 enum { NO_RESOURCE = 0 };
 
 class D3D12RenderDevice;
@@ -104,17 +128,18 @@ public:
 	void* lookup_resource(RenderHandle resource_handle);
 
 
+	Handle create_texture(const TextureDesc &desc, const void *data);
+	void destroy_texture(Handle handle);
+
+	Handle create_vertex_buffer(const VertexBufferDesc &desc, const void *data);
+
 private:
-	void create_texture(const TextureDesc &desc, const void *data);
 	
-	//Array<ComPtr<ID3D12Resource*> > _static_resource_heaps;
-	//Array< ComPtr<ID3D12PipelineState*> > _graphics_pipeline_states;
-	//Array< ComPtr<ID3D12DescriptorHeap> > _cbv_srv_uav_heaps;
-	//Array< ComPtr<ID3D12DescriptorHeap> > _sampler_heaps;
+	
+	HandleContainer<TextureResource*> _textures;
 
-	std::vector< ComPtr<ID3D12DescriptorHeap> > _srv_offline_heap;
-	std::vector<TextureResource*> _textures;
-
+	DescriptorHeap _srv_uav_cbv_offline_heap;
+	DescriptorHeap _sampler_offline_heap;
 
 	D3D12RenderDevice&	_render_device;
 	unsigned _rtv_desc_size;
