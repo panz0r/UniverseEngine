@@ -7,8 +7,7 @@ __THREAD_LOCAL RuntimeDescriptorHeap *DescriptorHeapFactory::_cbv_uav_srv_heap =
 __THREAD_LOCAL RuntimeDescriptorHeap *DescriptorHeapFactory::_sampler_heap = nullptr;
 
 
-DescriptorHeapFactory::DescriptorHeapFactory(ID3D12Device *device)
-	: _device(device)
+DescriptorHeapFactory::DescriptorHeapFactory()
 {
 
 }

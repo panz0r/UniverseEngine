@@ -10,6 +10,9 @@
     <Filter Include="memory">
       <UniqueIdentifier>{b3ef4089-9008-4f6a-b915-38147a8906a6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="resources">
+      <UniqueIdentifier>{a7d6aee5-1082-4a86-94a3-81897d1b0517}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="renderer\render_device.h">
@@ -51,9 +54,29 @@
     <ClInclude Include="memory\first_fit_allocator.h">
       <Filter>memory</Filter>
     </ClInclude>
-    <ClInclude Include="memory\buddy_allocator.h">
-      <Filter>memory</Filter>
+    <ClInclude Include="memory\d3d_memory.h" />
+    <ClInclude Include="resource\texture.h">
+      <Filter>resources</Filter>
     </ClInclude>
+    <ClInclude Include="resource\placed_gpu_resource.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\common.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\buffer.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\pipeline_state_object.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\render_resource_context.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\command_list.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="primitive.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="renderer\render_device.cpp">
@@ -80,5 +103,9 @@
     <ClCompile Include="memory\first_fit_allocator.cpp">
       <Filter>memory</Filter>
     </ClCompile>
+    <ClCompile Include="renderer\render_resource_context.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="primitive.cpp" />
   </ItemGroup>
 </Project>

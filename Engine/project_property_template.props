@@ -10,6 +10,7 @@
     <ClCompile>
       <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\libs</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WINDOWSPC</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup />

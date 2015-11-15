@@ -1,4 +1,4 @@
-#if defined(WIN32)
+#if defined(WINDOWSPC)
 #include "platform_win32.h"
 
 #define WIN32_LEAN_AND_MEAN

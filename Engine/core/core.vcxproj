@@ -23,6 +23,7 @@
     <ClInclude Include="collection\array.h" />
     <ClInclude Include="handle\handle.h" />
     <ClInclude Include="handle\handle_container.h" />
+    <ClInclude Include="memory\buddy_allocator_ext.h" />
     <ClInclude Include="platform\platform.h" />
     <ClInclude Include="platform\win32\platform_win32.h" />
     <ClInclude Include="thread\atomic_spin_lock.h" />
@@ -34,6 +35,7 @@
     <ClInclude Include="thread\win32\thread_win32.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="handle\handle.cpp" />
     <ClCompile Include="platform\win32\platform_win32.cpp" />
     <ClCompile Include="thread\fiber_system.cpp" />
     <ClCompile Include="thread\win32\fiber_win32.cpp" />

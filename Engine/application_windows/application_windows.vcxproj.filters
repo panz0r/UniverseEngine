@@ -4,6 +4,9 @@
     <Filter Include="application">
       <UniqueIdentifier>{aa6ecc78-3eb5-47ea-bf66-9f146da23f04}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{31262080-e2c3-4a44-8355-9f44e108d3a4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="application\main.cpp">
@@ -23,5 +26,13 @@
     <ClInclude Include="application\window.h">
       <Filter>application</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\shaders\PixelShader.hlsl">
+      <Filter>shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\shaders\VertexShader.hlsl">
+      <Filter>shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

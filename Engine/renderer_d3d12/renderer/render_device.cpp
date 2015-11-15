@@ -11,12 +11,10 @@ D3D12RenderDevice::D3D12RenderDevice(const D3D12RenderDeviceDesc & desc)
 , _back_buffer_index(0)
 {
 	open();
-	_resource_manager = new ResourceManager(*this);
 }
 
 D3D12RenderDevice::~D3D12RenderDevice()
 {
-	delete _resource_manager;
 	close();
 }
 
@@ -27,7 +25,8 @@ void D3D12RenderDevice::open()
 		_debug->EnableDebugLayer();
 	}
 
-	D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&_device));
+	HRESULT hr = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&_device));
+	UENSURE(SUCCEEDED(hr));
 
 	D3D12_COMMAND_QUEUE_DESC cmdq_desc;
 	cmdq_desc.NodeMask = 0;
@@ -35,11 +34,13 @@ void D3D12RenderDevice::open()
 	cmdq_desc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
 	cmdq_desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	
-	_device->CreateCommandQueue(&cmdq_desc, IID_PPV_ARGS(&_command_queue));
+	hr = _device->CreateCommandQueue(&cmdq_desc, IID_PPV_ARGS(&_command_queue));
+	UENSURE(SUCCEEDED(hr));
 
 	{
 		ComPtr<IDXGIFactory4> factory;
-		CreateDXGIFactory1(IID_PPV_ARGS(&factory));
+		hr = CreateDXGIFactory1(IID_PPV_ARGS(&factory));
+		UENSURE(SUCCEEDED(hr));
 
 		DXGI_SWAP_CHAIN_DESC swap_chain_desc = { 0 };
 		swap_chain_desc.OutputWindow = _desc.window_handle;
@@ -55,17 +56,50 @@ void D3D12RenderDevice::open()
 		swap_chain_desc.Windowed = !_desc.fullscreen;
 
 		ComPtr<IDXGISwapChain> swap_chain;
-		factory->CreateSwapChain(_command_queue.Get(), &swap_chain_desc, &swap_chain);
+		hr = factory->CreateSwapChain(_command_queue.Get(), &swap_chain_desc, &swap_chain);
+		UENSURE(SUCCEEDED(hr));
+
 		swap_chain.As(&_swap_chain);
 
 		_back_buffer_index = _swap_chain->GetCurrentBackBufferIndex();
+
+		_back_buffers = new ID3D12Resource*[_desc.back_buffer_count];
+		for (unsigned i = 0; i < _desc.back_buffer_count; ++i) {
+			_swap_chain->GetBuffer(i, IID_PPV_ARGS(&_back_buffers[i]));
+		}
 	}
+
+	hr = _device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&_fence));
+	_fence_value = 1;
+	_fence_event = CreateEventEx(nullptr, 0, 0, EVENT_ALL_ACCESS);
+
 }
 
 
 void D3D12RenderDevice::close()
 {
-	
+}
+
+
+void D3D12RenderDevice::present()
+{
+	_swap_chain->Present(0, 0);
+	_back_buffer_index = _swap_chain->GetCurrentBackBufferIndex();
+
+
+}
+
+void D3D12RenderDevice::wait_for_fence()
+{
+	auto fence = _fence_value;
+	_command_queue->Signal(_fence.Get(), fence);
+	_fence_value++;
+
+	if (_fence->GetCompletedValue() < fence)
+	{
+		_fence->SetEventOnCompletion(fence, _fence_event);
+		WaitForSingleObject(_fence_event, INFINITE);
+	}
 }
 
 

@@ -4,107 +4,29 @@
 #include "d3dx12.h"
 #include <core/assert/assert.h>
 #include <core/handle/handle_container.h>
+#include <core/memory/buddy_allocator_ext.h>
+
 #include <renderer_d3d12/com/com_ptr.h>
+
+#include <renderer_d3d12/resource/texture.h>
+#include <renderer_d3d12/resource/buffer.h>
+#include <renderer_d3d12/resource/pipeline_state_object.h>
+#include <renderer_d3d12/renderer/render_resource_context.h>
+
 #include "descriptor_heap.h"
 #include <vector>
+#include <atomic>
+
+
 
 namespace ue
 {
 
-enum ResourceType
-{
-	Texture,
-	VertexBuffer
-};
-
-struct TextureDesc
-{
-	unsigned width;
-	unsigned height;
-	unsigned depth;
-	unsigned mip_levels;
-	unsigned format;
-	unsigned dimension;
-	bool dynamic;
-};
-
-struct VertexBufferDesc
-{
-
-};
-
-// Resources, and what's needed in runtime
-struct RenderResource
-{
-	enum Type { Texture };
-	Type type;
-};
-
-struct TextureResource : public RenderResource
-{
-	ComPtr<ID3D12Resource> resource;
-	
-	DescriptorHeapHandle *handles;
-	D3D12_CPU_DESCRIPTOR_HANDLE *srv;
-	D3D12_CPU_DESCRIPTOR_HANDLE *uav;
-
-	void *mapped_data;
-	size_t size;
-	bool dynamic;
-};
-
-struct RenderTarget
-{
-	enum Binding { AS_TARGET, AS_SHADER_RESOURCE };
-	// srv
-	// rtv/dsv
-	// current state
-};
-
-struct Sampler
-{
-	// sampler view
-	D3D12_CPU_DESCRIPTOR_HANDLE handle;
-};
-
-struct ConstantBuffer
-{
-	D3D12_CPU_DESCRIPTOR_HANDLE *cbv;
-	void *mapped_data;
-	// cbv * frames
-	// mapped data * frames
-	// size
-};
-
-struct StaticBuffer
-{
-	ID3D12Resource *resource;
-	D3D12_CPU_DESCRIPTOR_HANDLE *srv;
-	D3D12_CPU_DESCRIPTOR_HANDLE *uav;
-	D3D12_VERTEX_BUFFER_VIEW *vbv;
-	D3D12_INDEX_BUFFER_VIEW *ibv;
-	void *mapped_data;
-
-	// srv/uav/vbv/ibv
-	// mapped data
-	// stride
-	// size
-};
-
-struct DynamicBuffer
-{
-	// srv/uav/vbv/ibv * frames
-	// mapped data * frames
-	// stride
-	// size
-};
-
-
-
-typedef Handle RenderHandle;
 enum { NO_RESOURCE = 0 };
 
 class D3D12RenderDevice;
+struct RenderAtom;
+struct InstancedRenderAtomDesc;
 
 class ResourceManager
 {
@@ -124,22 +46,47 @@ public:
 		return (handle & INDEX_MASK);
 	}
 
+	RenderResource* lookup_resource(RenderHandle resource_handle);
 
-	void* lookup_resource(RenderHandle resource_handle);
+	RenderHandle create_texture(ID3D12GraphicsCommandList *command_list, const TextureDesc &desc, const void *data);
+	void destroy_texture(RenderHandle handle);
 
+	RenderHandle create_vertex_buffer(const BufferDesc &desc, const void *data, RenderResourceContext &rrc);
+	RenderHandle create_index_buffer(const BufferDesc &desc, const void *data, RenderResourceContext &rrc);
+	RenderHandle create_constant_buffer(const BufferDesc &desc, const void *data, RenderResourceContext &rrc);
+	
+	RenderHandle create_render_target_from_resource(ID3D12Resource *resource);
 
-	Handle create_texture(const TextureDesc &desc, const void *data);
-	void destroy_texture(Handle handle);
+	//RenderHandle create_render_target(const RenderTargetDesc &desc, RenderResourceContext &rrc);
 
-	Handle create_vertex_buffer(const VertexBufferDesc &desc, const void *data);
+	RenderHandle create_pipeline_state_object(const PipelineStateObjectDesc &desc);
+	RenderHandle create_render_atom(const InstancedRenderAtomDesc &desc);
+
+	ID3D12RootSignature* root_signatire() { return _root_signature.Get(); }
 
 private:
 	
-	
 	HandleContainer<TextureResource*> _textures;
+	HandleContainer<RenderTargetResource*> _render_targets;
+	HandleContainer<BufferResource*> _buffers;
+	HandleContainer<PipelineStateResource*> _pipeline_states;
+	HandleContainer<RenderAtom*> _render_atoms;
 
 	DescriptorHeap _srv_uav_cbv_offline_heap;
 	DescriptorHeap _sampler_offline_heap;
+	DescriptorHeap _rtv_heap;
+	DescriptorHeap _dsv_heap;
+
+	ComPtr<ID3D12Heap> _resource_heap;
+	ComPtr<ID3D12Resource> _upload_heap;
+	std::atomic<size_t> _upload_heap_offset;
+
+	BuddyAllocatorExt _resource_allocator;
+
+	// Temp stuff
+	ComPtr<ID3D12RootSignature> _root_signature;	// just one root signature for now
+	
+
 
 	D3D12RenderDevice&	_render_device;
 	unsigned _rtv_desc_size;

@@ -23,7 +23,7 @@ public:
 	, _command_list(command_list) 
 	{}
 	
-	void render(class RenderAtom *atom, ID3D12GraphicsCommandList *command_list);
+	void render(struct RenderAtom *atom, ID3D12GraphicsCommandList *command_list);
 
 	ID3D12RootSignature*	_root_signature;
 	ID3D12PipelineState*	_pso;

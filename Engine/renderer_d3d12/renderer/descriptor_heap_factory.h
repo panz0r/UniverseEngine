@@ -27,7 +27,7 @@ struct RuntimeDescriptorHeap
 		// check to see if we need to wrap around
 		if ((_max_count - _use_count) < count)
 		{
-			assert((_fence->GetCompletedValue() > count) && "heap to small!");
+			//assert((_fence->GetCompletedValue() > count) && "heap to small!");
 
 			{
 				_cpu_handle = _heap->GetCPUDescriptorHandleForHeapStart();
@@ -44,7 +44,7 @@ class DescriptorHeapFactory
 {
 public:
 	enum Type { CBV_UAV_SRV, Sampler };
-	DescriptorHeapFactory(ID3D12Device *device);
+	DescriptorHeapFactory();
 	~DescriptorHeapFactory();
 
 	static void thread_initialize(ID3D12Device *device);
@@ -52,8 +52,6 @@ public:
 	RuntimeDescriptorHeap *checkout_descriptor_heap(Type type);
 
 private:
-	ID3D12Device *_device;
-
 	static __THREAD_LOCAL RuntimeDescriptorHeap *_cbv_uav_srv_heap;
 	static __THREAD_LOCAL RuntimeDescriptorHeap *_sampler_heap;
 

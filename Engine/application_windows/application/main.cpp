@@ -43,7 +43,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine, 
 	ue::Application* application = new ue::Application(window_handle);
 	application->initialize();
 
-
 	MSG msg;
 	::ZeroMemory(&msg, sizeof(MSG));
 

@@ -1,6 +1,6 @@
-#if defined(WIN32)
+#if defined(WINDOWSPC)
 
-#define ALIGN(x) _declspec(align(x))
+#define __ALIGN(x) _declspec(align(x))
 
 typedef unsigned long long uint64;
 typedef long long int64;

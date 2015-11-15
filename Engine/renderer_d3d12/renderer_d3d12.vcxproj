@@ -21,8 +21,10 @@
   <ItemGroup>
     <ClInclude Include="com\com_ptr.h" />
     <ClInclude Include="d3dx12.h" />
-    <ClInclude Include="memory\buddy_allocator.h" />
+    <ClInclude Include="memory\d3d_memory.h" />
     <ClInclude Include="memory\first_fit_allocator.h" />
+    <ClInclude Include="primitive.h" />
+    <ClInclude Include="renderer\command_list.h" />
     <ClInclude Include="renderer\command_list_factory.h" />
     <ClInclude Include="renderer\descriptor_heap.h" />
     <ClInclude Include="renderer\descriptor_heap_factory.h" />
@@ -30,19 +32,32 @@
     <ClInclude Include="renderer\render_context.h" />
     <ClInclude Include="renderer\render_device.h" />
     <ClInclude Include="renderer\render_device_desc.h" />
+    <ClInclude Include="renderer\render_resource_context.h" />
     <ClInclude Include="renderer\render_tasks.h" />
     <ClInclude Include="renderer\resources.h" />
     <ClInclude Include="renderer\resource_manager.h" />
+    <ClInclude Include="resource\common.h" />
+    <ClInclude Include="resource\pipeline_state_object.h" />
+    <ClInclude Include="resource\placed_gpu_resource.h" />
+    <ClInclude Include="resource\texture.h" />
+    <ClInclude Include="resource\buffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="memory\first_fit_allocator.cpp" />
+    <ClCompile Include="primitive.cpp" />
     <ClCompile Include="renderer\command_list_factory.cpp" />
     <ClCompile Include="renderer\descriptor_heap_factory.cpp" />
     <ClCompile Include="renderer\render_atom.cpp" />
     <ClCompile Include="renderer\render_context.cpp" />
     <ClCompile Include="renderer\render_device.cpp" />
+    <ClCompile Include="renderer\render_resource_context.cpp" />
     <ClCompile Include="renderer\render_tasks.cpp" />
     <ClCompile Include="renderer\resource_manager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\math\math.vcxproj">
+      <Project>{78b3bbe3-e704-4044-a458-d4cef6761565}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CCC98F37-7886-43D7-9E50-306AABA81AA4}</ProjectGuid>

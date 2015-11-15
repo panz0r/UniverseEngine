@@ -9,6 +9,7 @@ namespace ue
 
 struct Handle
 {
+	static Handle InvalidHandle;
 
 	enum 
 	{

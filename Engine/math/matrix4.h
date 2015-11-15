@@ -59,7 +59,9 @@ inline void transformVectorArray(Matrix4x4Param iMat, Vector4* ioArray, unsigned
 // utility
 
 inline Matrix4x4 lookAtLH(Vector4Param iEyePoint, Vector4Param iFocusPoint, Vector4Param iUpVec);
-inline Matrix4x4 lookAtRH(Vector4Param iEyePoint, Vector4Param iFocusPoint, Vector4Param iUpVec);
+//inline Matrix4x4 lookAtRH(Vector4Param iEyePoint, Vector4Param iFocusPoint, Vector4Param iUpVec);
+inline Matrix4x4 lookAtRH(Vector3Param iEyePoint, Vector3Param iFocusPoint, Vector3Param iUpVec);
+
 inline Matrix4x4 perspectiveFovLH(float iFovDeg, float iAspect, float iNear, float iFar);
 inline Matrix4x4 perspectiveFovRH(float iFovDeg, float iAspect, float iNear, float iFar);
 inline Matrix4x4 orthographicLH(float iWidth, float iHeight, float iNear, float iFar);

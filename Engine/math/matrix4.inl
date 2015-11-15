@@ -467,6 +467,23 @@ inline void transformVectorArray(Matrix4x4Param iMat, Vector4* ioArray, unsigned
 //
 //}
 
+inline Matrix4x4 lookAtRH(Vector3Param iEyePoint, Vector3Param iFocusPoint, Vector3Param iUpVec)
+{
+	Vector3 zaxis = normalize(iEyePoint - iFocusPoint);
+	Vector3 xaxis = cross(iUpVec, zaxis);
+	Vector3 yaxis = cross(zaxis, xaxis);
+
+	Matrix4x4 ret =
+	{
+		xaxis.x, xaxis.y, xaxis.z, 0,
+		yaxis.x, yaxis.y, yaxis.z, 0,
+		zaxis.x, zaxis.y, zaxis.z, 0,
+		-dot(xaxis, iEyePoint), -dot(yaxis, iEyePoint), -dot(zaxis, iEyePoint), 1
+	};
+	return ret;
+}
+
+
 //////////////////////////////////////////////////////////////////////////
 
 inline Matrix4x4 perspectiveFovLH(float iFovDeg, float iAspect, float iNear, float iFar)
@@ -488,13 +505,13 @@ inline Matrix4x4 perspectiveFovLH(float iFovDeg, float iAspect, float iNear, flo
 
 inline Matrix4x4 perspectiveFovRH(float iFovDeg, float iAspect, float iNear, float iFar)
 {
-	float invHalfTan = 1.f / tanf( Math::radians(iFovDeg) * 0.5f );
+	float invHalfTan = 1.f / tanf(Math::radians(iFovDeg) * 0.5f);
 
 	Matrix4x4 persp = identity4x4();
 	persp.m00 = invHalfTan / iAspect;
 	persp.m11 = invHalfTan;
-	persp.m22 = iFar / (iFar - iNear);
-	persp.m32 = iFar * iNear / (iFar - iNear);
+	persp.m22 = iFar / (iNear - iFar);
+	persp.m32 = iNear * iFar / (iNear - iFar);
 	persp.m23 = -1;
 	persp.m33 = 0;
 

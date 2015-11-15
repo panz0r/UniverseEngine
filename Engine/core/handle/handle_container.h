@@ -27,8 +27,8 @@ public:
 	Handle insert(void *ptr, unsigned type)
 	{
 		unsigned index = _next_free_index;
-		if (index >= _handles.size()) {
-			grow(_handles.size() + 10);
+		if (index >= (unsigned)_handles.size()) {
+			grow((unsigned)_handles.size() + 10);
 		}
 		
 		HandleEntry& entry = _handles[index];
@@ -95,7 +95,7 @@ private:
 
 	inline void grow(unsigned new_size)
 	{
-		unsigned old_size = _handles.size();
+		unsigned old_size = (unsigned)_handles.size();
 		_handles.resize(new_size);
 		for (unsigned i = old_size; i < new_size; ++i) {
 			_handles[i] = HandleEntry(i + 1);

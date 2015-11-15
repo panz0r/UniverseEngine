@@ -14,7 +14,7 @@ inline size_t range_size(void *begin, void *end) {
 }
 
 inline void *ptr_align(void *ptr, unsigned align) {
-	return reinterpret_cast<void*>((reinterpret_cast<size_t>(ptr) + (align - 1)) & ~(align - 1));
+	return reinterpret_cast<void*>((reinterpret_cast<size_t>(ptr) + (size_t)((align - 1)) & ~(align - 1)));
 }
 
 inline void *ptr_subtract(void *ptr1, void *ptr2) {
