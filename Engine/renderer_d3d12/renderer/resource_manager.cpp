@@ -531,13 +531,6 @@ RenderHandle ResourceManager::create_constant_buffer(const BufferDesc &desc, con
 
 }
 
-
-struct apa
-{
-	unsigned hej;
-	void * kalle;
-};
-
 RenderHandle ResourceManager::create_render_atom(const InstancedRenderAtomDesc &desc, unsigned root_parameter_count, RootParameterDesc * root_parameters, RootParameterValue * root_values)
 {
 	size_t required_size = sizeof(InstancedRenderAtom);
@@ -545,32 +538,36 @@ RenderHandle ResourceManager::create_render_atom(const InstancedRenderAtomDesc &
 	required_size += sizeof(D3D12_INDEX_BUFFER_VIEW);
 	required_size += sizeof(D3D12_VERTEX_BUFFER_VIEW) * desc.vertex_buffer_count;
 	
-	int last_table_index = -1;
 	for (unsigned i = 0; i < root_parameter_count; ++i) {
 		auto &root_parameter = root_parameters[i];
 
 		switch (root_parameter.type)
 		{
-		case RootParameter::ROOT_CONSTANT:
-		case RootParameter::ROOT_MULTIPLE_CONSTANTS:
-			required_size += sizeof(RootParameter);
-			required_size += sizeof(RootParameterConstants);
-			required_size += sizeof(unsigned) * root_parameter.root_constant.num_values;
-			break;
-		case RootParameter::ROOT_CBV:
-		case RootParameter::ROOT_SRV:
-		case RootParameter::ROOT_UAV:
-			required_size += sizeof(RootParameter);
-			required_size += sizeof(D3D12_GPU_VIRTUAL_ADDRESS);
-			break;
-		case RootParameter::ROOT_DESCRIPTOR_TABLE:
-			if (last_table_index != root_parameter.index) {
+			case RootParameter::ROOT_CONSTANT:
+			case RootParameter::ROOT_MULTIPLE_CONSTANTS:
+				required_size += sizeof(RootParameter);
+				required_size += sizeof(RootParameterConstants);
+				required_size += sizeof(unsigned) * root_parameter.root_constant.num_values;
+				break;
+			case RootParameter::ROOT_CBV:
+			case RootParameter::ROOT_SRV:
+			case RootParameter::ROOT_UAV:
+				required_size += sizeof(RootParameter);
+				required_size += sizeof(D3D12_GPU_VIRTUAL_ADDRESS);
+				break;
+			case RootParameter::ROOT_DESCRIPTOR_TABLE:
+			{
 				required_size += sizeof(RootParameter);
 				required_size += sizeof(RootParameterDescriptorTable);
-				last_table_index = root_parameter.index;
+
+				int j = i;
+				while (root_parameters[j].index == root_parameter.index) {
+					required_size += sizeof(D3D12_CPU_DESCRIPTOR_HANDLE);
+					j++;
+				}
+				i = j - 1;
+				break;
 			}
-			required_size += sizeof(D3D12_CPU_DESCRIPTOR_HANDLE);
-			break;
 		}
 	}
 
@@ -623,10 +620,10 @@ RenderHandle ResourceManager::create_render_atom(const InstancedRenderAtomDesc &
 				size += sizeof(RootParameterConstants) + sizeof(unsigned) * root_parameter.root_constant.num_values;
 
 				auto blob_root_parameter = (RootParameter*)p;
+				blob_root_parameter->size = size;
 				blob_root_parameter->index = root_parameter.index;
 				blob_root_parameter->type = root_parameter.type;
 				blob_root_parameter->hash = -1;
-				blob_root_parameter->size = size;
 			
 				auto blob_root_parameter_constants = (RootParameterConstants*)(p + sizeof(RootParameter));
 				blob_root_parameter_constants->num_values = root_parameter.root_constant.num_values;
@@ -644,9 +641,9 @@ RenderHandle ResourceManager::create_render_atom(const InstancedRenderAtomDesc &
 				size += sizeof(D3D12_GPU_VIRTUAL_ADDRESS);
 
 				auto blob_root_parameter = (RootParameter*)p;
+				blob_root_parameter->size = size;
 				blob_root_parameter->index = root_parameter.index;
 				blob_root_parameter->type = root_parameter.type;
-				blob_root_parameter->size = size;
 				blob_root_parameter->hash = -1;
 				
 				void * blob_gpu_virtual_address = (void*)(p + sizeof(RootParameter));
@@ -662,9 +659,9 @@ RenderHandle ResourceManager::create_render_atom(const InstancedRenderAtomDesc &
 				size += sizeof(RootParameterDescriptorTable);
 
 				auto blob_root_parameter = (RootParameter*)p;
+				blob_root_parameter->size = size;
 				blob_root_parameter->index = root_parameter.index;
 				blob_root_parameter->type = root_parameter.type;
-				blob_root_parameter->size = size;
 				blob_root_parameter->hash = -1;
 				
 				auto blob_root_parameter_descriptor_table = (RootParameterDescriptorTable*)(p + sizeof(RootParameter));
