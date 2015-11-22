@@ -9,7 +9,7 @@ namespace ue
 class D3D12RenderDevice;
 class CommandListFactory;
 class ResourceManager;
-class DescriptorHeapFactory;
+class OnlineDescriptorHeapFactory;
 
 class Application
 {
@@ -26,7 +26,7 @@ private:
 	D3D12RenderDevice *_render_device;
 	CommandListFactory *_command_list_factory;
 	ResourceManager *_resource_manager;
-	DescriptorHeapFactory *_descriptor_heap_factory;
+	OnlineDescriptorHeapFactory *_descriptor_heap_factory;
 
 
 };

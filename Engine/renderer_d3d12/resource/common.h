@@ -22,8 +22,20 @@ enum ShaderType
 
 struct RenderResource
 {
-	enum ResourceType { Texture, RenderTarget, Buffer, PipelineState, InstancedRenderAtom };
+
+	enum ResourceType { 
+		Texture, 
+		RenderTarget, 
+		Buffer, 
+		ConstantBuffer, 
+		PipelineState, 
+		InstancedRenderAtom 
+	};
+
 	ResourceType type;
+
+	virtual D3D12_GPU_VIRTUAL_ADDRESS gpu_virtual_address() { return D3D12_GPU_VIRTUAL_ADDRESS(); }
+	virtual D3D12_CPU_DESCRIPTOR_HANDLE cpu_descriptor_handle() { return D3D12_CPU_DESCRIPTOR_HANDLE(); };
 };
 
 typedef Handle RenderHandle;

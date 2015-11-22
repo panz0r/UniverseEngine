@@ -1,7 +1,7 @@
 #include "render_tasks.h"
 #include "render_atom.h"
 #include "command_list_factory.h"
-#include "descriptor_heap_factory.h"
+#include "online_descriptor_heap.h"
 #include <renderer_d3d12/resource/texture.h>
 #include <d3d12.h>
 
@@ -16,13 +16,13 @@ void DrawInstancedTask::execute(void *user_data) {
 	StateCache state_cache = {};
 	ID3D12Device *device = task_data->device;
 
-	auto cbv_srv_uav_heap = task_data->desctriptor_heap_factory->checkout_descriptor_heap(DescriptorHeapFactory::CBV_UAV_SRV);
-	auto sampler_heap = task_data->desctriptor_heap_factory->checkout_descriptor_heap(DescriptorHeapFactory::Sampler);
+	OnlineDescriptorHeap *cbv_srv_uav_heap = task_data->desctriptor_heap_factory->checkout_descriptor_heap(OnlineDescriptorHeapFactory::CBV_UAV_SRV);
+	OnlineDescriptorHeap *sampler_heap = task_data->desctriptor_heap_factory->checkout_descriptor_heap(OnlineDescriptorHeapFactory::Sampler);
 	DescriptorHeaps descriptor_heaps = { cbv_srv_uav_heap, sampler_heap };
 	
 	ID3D12GraphicsCommandList *command_list;
 
-	auto command_list_interface = task_data->command_list_factory->aquire_command_list<ID3D12GraphicsCommandList>();
+	auto command_list_interface = task_data->command_list_factory->aquire_command_list();
 	command_list = command_list_interface->command_list();
 	
 	auto &render_atoms = task_data->render_atoms;
@@ -35,7 +35,7 @@ void DrawInstancedTask::execute(void *user_data) {
 
 	command_list->SetGraphicsRootSignature(task_data->root_signature);
 	
-	command_list->OMSetRenderTargets(1, task_data->rt->rtv, false, nullptr);
+	command_list->OMSetRenderTargets(1, task_data->rt->rtv, false, task_data->dst->dsv);
 	command_list->RSSetViewports(1, &task_data->vp);
 	command_list->RSSetScissorRects(1, &task_data->scissor);
 

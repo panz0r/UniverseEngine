@@ -11,7 +11,8 @@ namespace ue
 class D3D12RenderDevice;
 class ResourceManager;
 class CommandListFactory;
-class DescriptorHeapFactory;
+class OnlineDescriptorHeapFactory;
+struct InstancedRenderAtom;
 struct InstancedRenderAtom;
 struct RenderTargetResource;
 
@@ -20,11 +21,12 @@ struct DrawInstancedTaskData
 	ID3D12Device *device;
 	ID3D12RootSignature *root_signature;
 	CommandListFactory *command_list_factory;
-	DescriptorHeapFactory *desctriptor_heap_factory;
+	OnlineDescriptorHeapFactory *desctriptor_heap_factory;
 	ID3D12GraphicsCommandList *override_cmd_list;
 
 
 	RenderTargetResource* rt;
+	RenderTargetResource* dst;
 	D3D12_VIEWPORT vp;
 	D3D12_RECT scissor;
 

@@ -3,6 +3,8 @@
 #include <d3d12.h>
 #include <dxgi1_4.h>
 
+#include <renderer\renderer\render_device_interface.h>
+
 #include <renderer_d3d12/com/com_ptr.h>
 #include "render_device_desc.h"
 
@@ -11,32 +13,34 @@ namespace ue
 
 class ResourceManager;
 
-class D3D12RenderDevice
+class D3D12RenderDevice : public IRenderDevice
 {
 public:
-	D3D12RenderDevice(const D3D12RenderDeviceDesc& desc);
-	~D3D12RenderDevice();
+	D3D12RenderDevice(const RenderDeviceDesc& desc);
+	virtual ~D3D12RenderDevice();
 
-	ID3D12Device* device() { return _device.Get(); }
-	IDXGISwapChain* swap_chain() { return _swap_chain.Get(); }
+	// Interface exposed methods
 
-	unsigned current_back_buffer() { return _back_buffer_index; }
-	unsigned buffer_count() const { return _desc.back_buffer_count; }
-	ID3D12Resource* back_buffer(unsigned index) { return _back_buffers[index]; }
+	virtual void open();
+	virtual void close();
+	virtual unsigned current_back_buffer() { 
+		return _back_buffer_index; 
+	}
+	virtual unsigned back_buffer_count() {
+		return _render_device_desc.back_buffer_count;
+	}
+	virtual void present();
+	virtual void wait_for_fence();
 
+	// D3D12 internal methods
+
+	ID3D12Device * device() { return _device.Get(); }
+	IDXGISwapChain * swap_chain() { return _swap_chain.Get(); }
+	ID3D12Resource * get_back_buffer(unsigned index) { return _back_buffers[index]; }
 	ID3D12CommandQueue * command_queue() { return _command_queue.Get(); }
 
-	void present();
-	void wait_for_fence();
-
 private:
-
-	void open();
-	void close();
-
-private:
-	
-	D3D12RenderDeviceDesc _desc;
+	RenderDeviceDesc _render_device_desc;
 	unsigned _back_buffer_index;
 
 	ComPtr<ID3D12Debug> _debug;
@@ -51,8 +55,6 @@ private:
 	ComPtr<ID3D12Fence> _fence;
 	HANDLE _fence_event;
 	unsigned long long _fence_value;
-
-
 };
 
 

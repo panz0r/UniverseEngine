@@ -11,11 +11,11 @@ namespace ue
 {
 
 
-struct DescriptorHeapHandle
+struct OfflineDescriptorHeapHandle
 {
 	enum { INDEX_BIT = 20, COUNTER_BIT = 12 };
-	DescriptorHeapHandle() : _index(0), _counter(0) {}
-	DescriptorHeapHandle(unsigned index, unsigned counter)
+	OfflineDescriptorHeapHandle() : _index(0), _counter(0) {}
+	OfflineDescriptorHeapHandle(unsigned index, unsigned counter)
 		: _index(index)
 		, _counter(counter)
 	{}
@@ -25,22 +25,23 @@ struct DescriptorHeapHandle
 };
 
 
-class DescriptorHeap
+class OfflineDescriptorHeap
 {
 public:
 
-	DescriptorHeap(ID3D12Device &device, D3D12_DESCRIPTOR_HEAP_TYPE type, unsigned descriptor_count_per_heap, bool shader_visible = false)
+	OfflineDescriptorHeap(ID3D12Device &device, D3D12_DESCRIPTOR_HEAP_TYPE type, unsigned descriptor_count_per_heap, unsigned per_handle_heap_items, bool shader_visible = false)
 		: _device(device)
 		, _descriptor_heap_type(type)
 		, _descriptor_handle_size(device.GetDescriptorHandleIncrementSize(type))
 		, _descriptor_count_per_heap(descriptor_count_per_heap)
+		, _per_handle_heap_items(per_handle_heap_items)
 		, _descriptor_heap_shader_visible(shader_visible)
 		, _next_free_index(0)
 	{
 	}
 
 
-	DescriptorHeapHandle aquire_handle()
+	OfflineDescriptorHeapHandle aquire_handle()
 	{
 		unsigned index = _next_free_index;
 
@@ -60,42 +61,43 @@ public:
 			unsigned heap_index = 0;
 			Heap &heap = find_or_create_heap(heap_index);
 			entry.heap_index = heap_index;
-			entry.heap_offset = heap._use_count++;
+			entry.heap_offset = heap._use_count;
+			heap._use_count += _per_handle_heap_items;
 		}
 
-		entry.counter = (entry.counter + 1) % (1 << DescriptorHeapHandle::COUNTER_BIT);
+		entry.counter = (entry.counter + 1) % (1 << OfflineDescriptorHeapHandle::COUNTER_BIT);
 		entry.next_free = HandleEntry::IN_USE;
 
-		DescriptorHeapHandle handle(index, entry.counter);
+		OfflineDescriptorHeapHandle handle(index, entry.counter);
 		return handle;
 	}
 
-	void release_handle(DescriptorHeapHandle handle)
+	void release_handle(OfflineDescriptorHeapHandle handle)
 	{
 		HandleEntry &entry = _handles[handle._index];
 		entry.next_free = _next_free_index;
 		_next_free_index = handle._index;
 	}
 
-	D3D12_CPU_DESCRIPTOR_HANDLE cpu_descriptor_handle(DescriptorHeapHandle handle) const
+	D3D12_CPU_DESCRIPTOR_HANDLE cpu_descriptor_handle(OfflineDescriptorHeapHandle handle, unsigned offset = 0) const
 	{
 		const HandleEntry &entry = _handles[handle._index];
 		UASSERT(entry.counter == handle._counter, "invalid handle");
 		UASSERT(entry.next_free == HandleEntry::IN_USE, "handle was released");
 
 		const Heap &heap = get_heap(entry.heap_index);
-		CD3DX12_CPU_DESCRIPTOR_HANDLE cpu_descriptor_handle(heap.cpu(), entry.heap_offset, _descriptor_handle_size);
+		CD3DX12_CPU_DESCRIPTOR_HANDLE cpu_descriptor_handle(heap.cpu(), entry.heap_offset + offset, _descriptor_handle_size);
 		return cpu_descriptor_handle;
 	}
 
-	D3D12_GPU_DESCRIPTOR_HANDLE gpu_descriptor_handle(DescriptorHeapHandle handle) const
+	D3D12_GPU_DESCRIPTOR_HANDLE gpu_descriptor_handle(OfflineDescriptorHeapHandle handle, unsigned offset = 0) const
 	{
 		const HandleEntry &entry = _handles[handle._index];
 		UASSERT(entry.counter == handle._counter, "invalid handle");
 		UASSERT(entry.next_free == HandleEntry::IN_USE, "handle was released");
 		const Heap &heap = get_heap(entry.heap_index);
 
-		CD3DX12_GPU_DESCRIPTOR_HANDLE gpu_descriptor_handle(heap.gpu(), entry.heap_offset, _descriptor_handle_size);
+		CD3DX12_GPU_DESCRIPTOR_HANDLE gpu_descriptor_handle(heap.gpu(), entry.heap_offset + offset, _descriptor_handle_size);
 		return gpu_descriptor_handle;
 	}
 
@@ -105,8 +107,8 @@ private:
 	{
 		enum { UNINITIALIZED = 0xffffffff, IN_USE = 0xfffff };
 		HandleEntry() : next_free(0), counter(0), heap_index(UNINITIALIZED), heap_offset(UNINITIALIZED) {}
-		unsigned next_free : DescriptorHeapHandle::INDEX_BIT;
-		unsigned counter : DescriptorHeapHandle::COUNTER_BIT;
+		unsigned next_free : OfflineDescriptorHeapHandle::INDEX_BIT;
+		unsigned counter : OfflineDescriptorHeapHandle::COUNTER_BIT;
 		unsigned heap_index;
 		unsigned heap_offset;
 	};
@@ -153,6 +155,7 @@ private:
 	D3D12_DESCRIPTOR_HEAP_TYPE _descriptor_heap_type;
 	unsigned _descriptor_handle_size;
 	unsigned _descriptor_count_per_heap;
+	unsigned _per_handle_heap_items;
 	bool _descriptor_heap_shader_visible;
 	unsigned _next_free_index;
 	std::vector<Heap> _heaps;

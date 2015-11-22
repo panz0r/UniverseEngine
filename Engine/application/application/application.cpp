@@ -17,6 +17,7 @@
 #include <math/vector3.h>
 #include <math/vector4.h>
 #include <math/matrix4.h>
+#include <math/matrix3.h>
 
 namespace ue
 {
@@ -32,6 +33,8 @@ Application::~Application()
 
 RenderHandle render_atom;
 RenderHandle back_buffers[2];
+RenderHandle depth_stencil_target;
+RenderHandle cb_handle;
 
 DrawInstancedTaskData test_task;
 
@@ -42,8 +45,8 @@ void Application::initialize()
 	void *buffer = malloc(buffer_size);
 
 
-	D3D12RenderDeviceDesc device_desc;
-	device_desc.window_handle = (HWND)_window_handle;
+	RenderDeviceDesc device_desc;
+	device_desc.window_handle = _window_handle;
 	device_desc.debug = true;
 	device_desc.back_buffer_count = 2;
 	device_desc.width = 1024;
@@ -55,16 +58,15 @@ void Application::initialize()
 	_render_device = new D3D12RenderDevice(device_desc);
 	_command_list_factory = new CommandListFactory(*_render_device);
 	_resource_manager = new ResourceManager(*_render_device);
-	_descriptor_heap_factory = new DescriptorHeapFactory();
+	_descriptor_heap_factory = new OnlineDescriptorHeapFactory();
 
 	CommandListFactory::thread_initialize();
-	DescriptorHeapFactory::thread_initialize(_render_device->device());
+	OnlineDescriptorHeapFactory::thread_initialize(_render_device->device());
 
 
 	RenderHandle pso_handle = _resource_manager->create_pipeline_state_object(PipelineStateObjectDesc());
 	RenderHandle vb_handle;
 	RenderHandle ib_handle;
-	RenderHandle cb_handle;
 
 
 	auto &rrc = RenderResourceContext(*_render_device);
@@ -76,8 +78,8 @@ void Application::initialize()
 
 	primitives->cube(vb_verts, n_verts, ib_indices, n_indices, 0);
 
-	back_buffers[0] = _resource_manager->create_render_target_from_resource(_render_device->back_buffer(0));
-	back_buffers[1] = _resource_manager->create_render_target_from_resource(_render_device->back_buffer(1));
+	back_buffers[0] = _resource_manager->create_render_target_from_resource(_render_device->get_back_buffer(0));
+	back_buffers[1] = _resource_manager->create_render_target_from_resource(_render_device->get_back_buffer(1));
 
 	{
 		
@@ -103,6 +105,16 @@ void Application::initialize()
 		BufferDesc desc = {};
 		desc.size = sizeof(Matrix4x4);
 		cb_handle = _resource_manager->create_constant_buffer(desc, &mvp, rrc);
+		auto cbuffer = (ConstantBufferResource*)_resource_manager->lookup_resource(cb_handle);
+		memcpy(cbuffer->mapped_data, &mvp, sizeof(Matrix4x4));
+	}
+	{
+		RenderTargetDesc desc = {};
+		desc.width = device_desc.width;
+		desc.height = device_desc.height;
+		desc.format = 1;
+		desc.depth_stencil = true;
+		depth_stencil_target = _resource_manager->create_render_target(desc, rrc);
 	}
 
 	{
@@ -117,13 +129,29 @@ void Application::initialize()
 		desc.start_index_location = 0;
 		desc.start_instance_location = 0;
 		desc.topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-		desc.cbv_count = 1;
-		desc.cbvs[0] = cb_handle;
-		
-		render_atom = _resource_manager->create_render_atom(desc);
+
+		RootParameterDesc root_params[] =
+		{
+			{0, RootParameter::ROOT_CBV, 0 },
+			{1, RootParameter::ROOT_DESCRIPTOR_TABLE, 0 },
+			{1, RootParameter::ROOT_DESCRIPTOR_TABLE, 1 },
+			{1, RootParameter::ROOT_DESCRIPTOR_TABLE, 2 },
+			{2, RootParameter::ROOT_MULTIPLE_CONSTANTS, {4, 0} },
+		};
+
+		float root_constant_data = 98.f;
+		Vector4 color = vector4(1, 0, 1, 1);
+		RootParameterValue root_values[5] = {};
+		root_values[0].render_resource = cb_handle;
+		root_values[1].render_resource = cb_handle;
+		root_values[2].render_resource = cb_handle;
+		root_values[3].render_resource = cb_handle;
+		root_values[4].constant_data = &color;
+
+		render_atom = _resource_manager->create_render_atom(desc, 5, root_params, root_values);
 	}
 
-	auto rrc_command_list = _command_list_factory->aquire_command_list<ID3D12GraphicsCommandList>();
+	auto rrc_command_list = _command_list_factory->aquire_command_list();
 	rrc.dispatch(*rrc_command_list);
 	
 	_command_list_factory->release_command_list(rrc_command_list);
@@ -136,46 +164,30 @@ void Application::initialize()
 	test_task.command_list_factory = _command_list_factory;
 	test_task.desctriptor_heap_factory = _descriptor_heap_factory;
 	test_task.task_index = 0;
-	test_task.atom_count = 2;
+	test_task.atom_count = 1;
 	test_task.atom_offset = 0;
-	test_task.render_atoms.push_back((InstancedRenderAtom*)_resource_manager->lookup_resource(render_atom));
 	test_task.render_atoms.push_back((InstancedRenderAtom*)_resource_manager->lookup_resource(render_atom));
 	test_task.output_command_lists.resize(1);
 
-
-
-	//TextureDesc tex_desc;
-	//tex_desc.width = 256;
-	//tex_desc.height = 256;
-	//tex_desc.depth = 1;
-	//tex_desc.dimension = 3;
-	//tex_desc.format = 0;
-	//tex_desc.mip_levels = 1;
-	//tex_desc.dynamic = false;
-
-	//auto texture = resource_manager->create_texture(resource_command_list, tex_desc, nullptr);
-	//auto texture2 = resource_manager->create_texture(resource_command_list, tex_desc, nullptr);
-	//resource_manager->destroy_texture(texture);
-	//resource_manager->destroy_texture(texture2);
-
-	//D3D11RenderDevice* device = new D3D11RenderDevice((HWND)_window_handle, 1024, 768);
-	//D3D11RenderContext* context = new D3D11RenderContext(device->context());
-
-	//unsigned states = rand();
-	//context->drawcall(states);
 }
 
+Matrix4x4 _model = identity4x4();
 
 int Application::run()
 {
 
-//	InstancedRenderAtom *atom = (InstancedRenderAtom*)_resource_manager->lookup_resource(render_atom);
+	
+	Matrix4x4 rotation = matrix4x4(rotationX(0.02f)) * matrix4x4(rotationY(0.01f));
+	Matrix4x4 proj = perspectiveFovRH(60.f, 1024.f / (float)768.f, 0.1f, 100.f);
+	Matrix4x4 view = lookAtRH(vector3(0, 0, -6), vector3(0, 0, 0), vector3(0, 1, 0));
+	_model = rotation * _model;
+	Matrix4x4 mvp = transpose(_model * view * proj);
 
-	auto cmd_list = _command_list_factory->aquire_command_list<ID3D12GraphicsCommandList>();
+	ConstantBufferResource *cb = (ConstantBufferResource*)_resource_manager->lookup_resource(cb_handle);
+	memcpy(cb->map(0), &mvp, sizeof(Matrix4x4));
+
+	auto cmd_list = _command_list_factory->aquire_command_list();
 	auto command_list = cmd_list->command_list();
-
-//	command_list->SetGraphicsRootSignature(_resource_manager->root_signatire());
-
 
 	D3D12_VIEWPORT viewport = 
 	{
@@ -190,21 +202,20 @@ int Application::run()
 		1024, 768
 	};
 
-	command_list->RSSetViewports(1, &viewport);
-	command_list->RSSetScissorRects(1, &scissor);
-
 	RenderTargetResource *rt = (RenderTargetResource*)_resource_manager->lookup_resource(back_buffers[_render_device->current_back_buffer()]);
+	RenderTargetResource *dst = (RenderTargetResource*)_resource_manager->lookup_resource(depth_stencil_target);
+
 	rt->transition(command_list, RenderTargetResource::RENDER_TARGET);
 
-	//command_list->OMSetRenderTargets(1, rt->rtv, false, nullptr);
 
 	const float clear[] = { 0.f,0.2f,0.4f,1.f };
 	command_list->ClearRenderTargetView(*rt->rtv, clear, 0, nullptr);
-
+	command_list->ClearDepthStencilView(*dst->dsv, D3D12_CLEAR_FLAG_DEPTH, 1, 0, 0, nullptr);
 	_command_list_factory->release_command_list(cmd_list);
 	cmd_list->submit(_render_device->command_queue());
 
 	test_task.rt = rt;
+	test_task.dst = dst;
 	test_task.vp = viewport;
 	test_task.scissor = scissor;
 	test_task.override_cmd_list = nullptr;
@@ -212,9 +223,7 @@ int Application::run()
 	DrawInstancedTask::execute(&test_task);
 	test_task.output_command_lists[0]->submit(_render_device->command_queue());
 
-
-
-	cmd_list = _command_list_factory->aquire_command_list<ID3D12GraphicsCommandList>();
+	cmd_list = _command_list_factory->aquire_command_list();
 	command_list = cmd_list->command_list();
 
 	rt->transition(command_list, RenderTargetResource::PRESENT);
@@ -222,9 +231,9 @@ int Application::run()
 	_command_list_factory->release_command_list(cmd_list);
 	cmd_list->submit(_render_device->command_queue());
 
+	_render_device->wait_for_fence();
 	_render_device->present();
 
-	_render_device->wait_for_fence();
 
 
 	//FiberSystemParams* fiber_system_params = new FiberSystemParams();

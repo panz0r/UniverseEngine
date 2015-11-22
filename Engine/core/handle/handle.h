@@ -24,6 +24,11 @@ struct Handle
 	, _type(type)
 	{}
 	Handle(const Handle& handle) : _index(handle._index), _counter(handle._counter), _type(handle._type) {}
+	Handle(unsigned handle)
+		: _index((handle & INDEX_BITS))
+		, _counter((handle >> CounterLSH) & COUNTER_BITS)
+		, _type((handle >> TypeLSH) & TYPE_BITS)
+	{}
 
 	inline unsigned type() const { return _type; }
 	inline operator unsigned() const

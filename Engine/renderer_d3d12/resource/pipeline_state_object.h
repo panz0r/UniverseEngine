@@ -4,9 +4,6 @@
 namespace ue
 {
 
-
-
-
 struct PipelineStateObjectDesc
 {
 	RenderHandle input_layout;
@@ -28,9 +25,9 @@ struct PipelineStateObjectDesc
 	} sample_desc;
 };
 
-
 struct PipelineStateResource : public RenderResource
 {
+	static const ResourceType Type = RenderResource::PipelineState;
 	ComPtr<ID3D12PipelineState> _pipeline_state;
 };
 

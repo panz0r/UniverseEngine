@@ -1,4 +1,9 @@
 
+cbuffer meep : register(b4)
+{
+	float4 test;
+};
+
 struct PS_INPUT
 {
 	float4 pos : SV_Position;
@@ -6,5 +11,5 @@ struct PS_INPUT
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
-	return float4(1,0,0,1);
+	return test;
 }

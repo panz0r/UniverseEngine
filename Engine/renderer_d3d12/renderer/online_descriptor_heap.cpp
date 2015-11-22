@@ -1,24 +1,24 @@
-#include "descriptor_heap_factory.h"
+#include "online_descriptor_heap.h"
 
 namespace ue
 {
 
-__THREAD_LOCAL RuntimeDescriptorHeap *DescriptorHeapFactory::_cbv_uav_srv_heap = nullptr;
-__THREAD_LOCAL RuntimeDescriptorHeap *DescriptorHeapFactory::_sampler_heap = nullptr;
+__THREAD_LOCAL OnlineDescriptorHeap *OnlineDescriptorHeapFactory::_cbv_uav_srv_heap = nullptr;
+__THREAD_LOCAL OnlineDescriptorHeap *OnlineDescriptorHeapFactory::_sampler_heap = nullptr;
 
 
-DescriptorHeapFactory::DescriptorHeapFactory()
+OnlineDescriptorHeapFactory::OnlineDescriptorHeapFactory()
 {
 
 }
 
-DescriptorHeapFactory::~DescriptorHeapFactory()
+OnlineDescriptorHeapFactory::~OnlineDescriptorHeapFactory()
 {}
 
-void DescriptorHeapFactory::thread_initialize(ID3D12Device *device)
+void OnlineDescriptorHeapFactory::thread_initialize(ID3D12Device *device)
 {
 	unsigned max_count = 1000; // what is a good number?
-	_cbv_uav_srv_heap = new RuntimeDescriptorHeap(max_count);
+	_cbv_uav_srv_heap = new OnlineDescriptorHeap(max_count);
 	D3D12_DESCRIPTOR_HEAP_DESC desc;
 	desc.NodeMask = 0;
 	desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
@@ -29,7 +29,7 @@ void DescriptorHeapFactory::thread_initialize(ID3D12Device *device)
 	_cbv_uav_srv_heap->_cpu_handle = _cbv_uav_srv_heap->_heap->GetCPUDescriptorHandleForHeapStart();
 	_cbv_uav_srv_heap->_gpu_handle = _cbv_uav_srv_heap->_heap->GetGPUDescriptorHandleForHeapStart();
 
-	_sampler_heap = new RuntimeDescriptorHeap(max_count);
+	_sampler_heap = new OnlineDescriptorHeap(max_count);
 	desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
 	device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&_sampler_heap->_heap));
 	_sampler_heap->_cpu_handle = _sampler_heap->_heap->GetCPUDescriptorHandleForHeapStart();
@@ -37,9 +37,9 @@ void DescriptorHeapFactory::thread_initialize(ID3D12Device *device)
 
 }
 
-RuntimeDescriptorHeap *DescriptorHeapFactory::checkout_descriptor_heap(Type type)
+OnlineDescriptorHeap *OnlineDescriptorHeapFactory::checkout_descriptor_heap(Type type)
 {
-	RuntimeDescriptorHeap *ret = nullptr;
+	OnlineDescriptorHeap *ret = nullptr;
 	if (type == CBV_UAV_SRV)
 		ret = _cbv_uav_srv_heap;
 	if (type == Sampler)

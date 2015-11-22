@@ -19,51 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="com\com_ptr.h" />
-    <ClInclude Include="d3dx12.h" />
-    <ClInclude Include="memory\d3d_memory.h" />
-    <ClInclude Include="memory\first_fit_allocator.h" />
-    <ClInclude Include="primitive.h" />
-    <ClInclude Include="renderer\command_list.h" />
-    <ClInclude Include="renderer\command_list_factory.h" />
-    <ClInclude Include="renderer\offline_descriptor_heap.h" />
-    <ClInclude Include="renderer\online_descriptor_heap.h" />
-    <ClInclude Include="renderer\render_atom.h" />
-    <ClInclude Include="renderer\render_context.h" />
-    <ClInclude Include="renderer\render_device.h" />
-    <ClInclude Include="renderer\render_device_desc.h" />
-    <ClInclude Include="renderer\render_resource_context.h" />
-    <ClInclude Include="renderer\render_tasks.h" />
-    <ClInclude Include="renderer\resources.h" />
-    <ClInclude Include="renderer\resource_manager.h" />
-    <ClInclude Include="resource\common.h" />
-    <ClInclude Include="resource\pipeline_state_object.h" />
-    <ClInclude Include="resource\placed_gpu_resource.h" />
-    <ClInclude Include="resource\texture.h" />
-    <ClInclude Include="resource\buffer.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="memory\first_fit_allocator.cpp" />
-    <ClCompile Include="primitive.cpp" />
-    <ClCompile Include="renderer\command_list_factory.cpp" />
-    <ClCompile Include="renderer\online_descriptor_heap.cpp" />
-    <ClCompile Include="renderer\render_atom.cpp" />
-    <ClCompile Include="renderer\render_context.cpp" />
-    <ClCompile Include="renderer\render_device.cpp" />
-    <ClCompile Include="renderer\render_resource_context.cpp" />
-    <ClCompile Include="renderer\render_tasks.cpp" />
-    <ClCompile Include="renderer\resource_manager.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\math\math.vcxproj">
-      <Project>{78b3bbe3-e704-4044-a458-d4cef6761565}</Project>
-    </ProjectReference>
+    <ClInclude Include="renderer\render_device_interface.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{CCC98F37-7886-43D7-9E50-306AABA81AA4}</ProjectGuid>
+    <ProjectGuid>{184BADA5-C370-40BF-8696-2E4138510E1E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>renderer_d3d12</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10240.0</WindowsTargetPlatformVersion>
+    <RootNamespace>renderer</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -99,19 +61,15 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\project_property_template.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\project_property_template.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\project_property_template.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\project_property_template.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />

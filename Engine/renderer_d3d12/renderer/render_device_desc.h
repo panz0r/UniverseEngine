@@ -3,8 +3,6 @@
 namespace ue
 {
 
-
-
 struct D3D12RenderDeviceDesc
 {
 	bool debug;

@@ -28,8 +28,7 @@ public:
 
 	static void thread_initialize();
 	
-	template <class T>
-	inline CommandListInterface<T> *aquire_command_list();
+	inline GraphicsCommandList *aquire_command_list();
 
 	template <class T>
 	void release_command_list(CommandListInterface<T> *command_list);
@@ -41,8 +40,7 @@ private:
 	static __THREAD_LOCAL CommandListFreeList *_graphics_command_lists_free;
 };
 
-template <>
-inline CommandListInterface<ID3D12GraphicsCommandList> *CommandListFactory::aquire_command_list()
+inline GraphicsCommandList *CommandListFactory::aquire_command_list()
 {
 	// Not thread safe in this current state
 
@@ -60,7 +58,7 @@ inline CommandListInterface<ID3D12GraphicsCommandList> *CommandListFactory::aqui
 		}
 	}
 
-	CommandListInterface<ID3D12GraphicsCommandList> *command_list_storage = new CommandListInterface<ID3D12GraphicsCommandList>();
+	auto *command_list_storage = new GraphicsCommandList();
 	device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&command_list_storage->_command_allocator));
 	device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, command_list_storage->_command_allocator.Get(), nullptr, IID_PPV_ARGS(&command_list_storage->_command_list));
 	device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&command_list_storage->_fence));

@@ -73,6 +73,13 @@ public:
 		return *reinterpret_cast<const T*>(entry._data);
 	}
 
+	inline void* get_raw_ptr(Handle handle) const
+	{
+		const HandleEntry &entry = _handles[handle._index];
+		UASSERT(entry._in_use == true && entry._counter == handle._counter, "Handle is expired");
+		return entry._data;
+	}
+
 	template <typename T>
 	inline T* get_ptr(Handle handle) const
 	{

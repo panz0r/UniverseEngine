@@ -9,9 +9,9 @@
 namespace ue
 {
 
-struct RuntimeDescriptorHeap
+struct OnlineDescriptorHeap
 {
-	RuntimeDescriptorHeap(unsigned max_count_)
+	OnlineDescriptorHeap(unsigned max_count_)
 		: _max_count(max_count_)
 		, _use_count(0)
 	{}
@@ -22,8 +22,9 @@ struct RuntimeDescriptorHeap
 	unsigned _max_count;
 	unsigned _use_count;
 
-	void require(unsigned count)
+	bool require(unsigned count)
 	{
+		bool ret = true;
 		// check to see if we need to wrap around
 		if ((_max_count - _use_count) < count)
 		{
@@ -33,27 +34,29 @@ struct RuntimeDescriptorHeap
 				_cpu_handle = _heap->GetCPUDescriptorHandleForHeapStart();
 				_gpu_handle = _heap->GetGPUDescriptorHandleForHeapStart();
 				_use_count = 0;
+				ret = false;
 			}
 		}
 		_use_count += count;
+		return ret;
 	}
 };
 
 
-class DescriptorHeapFactory
+class OnlineDescriptorHeapFactory
 {
 public:
 	enum Type { CBV_UAV_SRV, Sampler };
-	DescriptorHeapFactory();
-	~DescriptorHeapFactory();
+	OnlineDescriptorHeapFactory();
+	~OnlineDescriptorHeapFactory();
 
 	static void thread_initialize(ID3D12Device *device);
 
-	RuntimeDescriptorHeap *checkout_descriptor_heap(Type type);
+	OnlineDescriptorHeap *checkout_descriptor_heap(Type type);
 
 private:
-	static __THREAD_LOCAL RuntimeDescriptorHeap *_cbv_uav_srv_heap;
-	static __THREAD_LOCAL RuntimeDescriptorHeap *_sampler_heap;
+	static __THREAD_LOCAL OnlineDescriptorHeap *_cbv_uav_srv_heap;
+	static __THREAD_LOCAL OnlineDescriptorHeap *_sampler_heap;
 
 };
 

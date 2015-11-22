@@ -32,7 +32,6 @@ public:
 		signal_submitted(command_queue);
 	}
 
-
 	T* command_list() { return _command_list.Get(); }
 
 	ComPtr<T> _command_list;

@@ -17,10 +17,13 @@ struct BufferDesc
 };
 
 
+
 struct BufferResource : RenderResource
 {
+	static const ResourceType Type = RenderResource::Buffer;
+
 	PlacedGPUResource placed_resource;
-	DescriptorHeapHandle *handles;
+	OfflineDescriptorHeapHandle *handles;
 	D3D12_CPU_DESCRIPTOR_HANDLE *srv;
 	D3D12_CPU_DESCRIPTOR_HANDLE *uav;
 	union
@@ -39,5 +42,33 @@ struct BufferResource : RenderResource
 	// stride
 	// size
 };
+
+struct ConstantBufferResource : public RenderResource
+{
+	static const ResourceType Type = RenderResource::ConstantBuffer;
+
+
+	OfflineDescriptorHeapHandle *handle;
+	D3D12_CPU_DESCRIPTOR_HANDLE *cbv;
+	D3D12_GPU_VIRTUAL_ADDRESS *gpu_va;
+
+	void *mapped_data;
+	unsigned frame_map_stride;
+
+	inline D3D12_CPU_DESCRIPTOR_HANDLE cbv_cpu_handle(unsigned frame_index) {
+		return cbv[frame_index];
+	}
+
+	inline void* map(unsigned frame_index) {
+		return reinterpret_cast<void*>(reinterpret_cast<size_t>(mapped_data) + frame_map_stride * frame_index);
+	}
+
+	virtual D3D12_GPU_VIRTUAL_ADDRESS gpu_virtual_address() { return gpu_va[0]; }
+	virtual D3D12_CPU_DESCRIPTOR_HANDLE cpu_descriptor_handle() { return cbv[0]; }
+
+
+	unsigned size;
+};
+
 
 }

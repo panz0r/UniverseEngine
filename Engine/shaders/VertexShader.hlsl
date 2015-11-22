@@ -1,8 +1,11 @@
 
-cbuffer draw
+cbuffer draw : register(b0)
 {
 	float4x4 mvp;
+
 };
+
+
 
 struct VS_INPUT
 {
