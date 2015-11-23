@@ -1,5 +1,5 @@
 #include "render_resource_context.h"
-#include "render_device.h"
+#include "d3d12_render_device.h"
 #include "d3dx12.h"
 
 #include <core/assert/assert.h>

@@ -4,10 +4,27 @@
     <Filter Include="renderer">
       <UniqueIdentifier>{8220f5fe-65ed-4d60-9fd0-6c37b702f594}</UniqueIdentifier>
     </Filter>
+    <Filter Include="primitive">
+      <UniqueIdentifier>{f67e7dbb-1bc9-4c21-b69c-ce0808974054}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resources">
+      <UniqueIdentifier>{ab411916-c40e-4e71-a500-99807486e59b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="renderer\render_device_interface.h">
       <Filter>renderer</Filter>
     </ClInclude>
+    <ClInclude Include="primitive\primitive_factory.h">
+      <Filter>primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\render_resource.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="primitive\primitive_factory.cpp">
+      <Filter>primitive</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

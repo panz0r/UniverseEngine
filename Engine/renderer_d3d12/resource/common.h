@@ -22,7 +22,6 @@ enum ShaderType
 
 struct RenderResource
 {
-
 	enum ResourceType { 
 		Texture, 
 		RenderTarget, 

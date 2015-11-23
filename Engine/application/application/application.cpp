@@ -4,10 +4,10 @@
 #include <core/thread/thread.h>
 #include <core/thread/fiber_system.h>
 
-#include <renderer_d3d12\renderer\render_device.h>
+#include <renderer_d3d12\renderer\d3d12_render_device.h>
 #include <renderer_d3d12\renderer\resource_manager.h>
 #include <renderer_d3d12\renderer\command_list_factory.h>
-#include <renderer_d3d12\primitive.h>
+#include <renderer\primitive\primitive_factory.h>
 
 #include <renderer_d3d12/renderer/render_atom.h>
 #include <renderer_d3d12/renderer/render_tasks.h>

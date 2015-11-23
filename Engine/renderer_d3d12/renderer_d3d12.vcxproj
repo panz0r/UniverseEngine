@@ -21,22 +21,27 @@
   <ItemGroup>
     <ClInclude Include="com\com_ptr.h" />
     <ClInclude Include="d3dx12.h" />
-    <ClInclude Include="memory\d3d_memory.h" />
     <ClInclude Include="memory\first_fit_allocator.h" />
-    <ClInclude Include="primitive.h" />
     <ClInclude Include="renderer\command_list.h" />
     <ClInclude Include="renderer\command_list_factory.h" />
     <ClInclude Include="renderer\offline_descriptor_heap.h" />
     <ClInclude Include="renderer\online_descriptor_heap.h" />
     <ClInclude Include="renderer\render_atom.h" />
     <ClInclude Include="renderer\render_context.h" />
-    <ClInclude Include="renderer\render_device.h" />
+    <ClInclude Include="renderer\d3d12_render_device.h" />
     <ClInclude Include="renderer\render_device_desc.h" />
     <ClInclude Include="renderer\render_resource_context.h" />
     <ClInclude Include="renderer\render_tasks.h" />
     <ClInclude Include="renderer\resources.h" />
     <ClInclude Include="renderer\resource_manager.h" />
     <ClInclude Include="resource\common.h" />
+    <ClInclude Include="resource\d3d12_buffer.h" />
+    <ClInclude Include="resource\d3d12_constant_buffer.h" />
+    <ClInclude Include="resource\d3d12_pipeline_state_object.h" />
+    <ClInclude Include="resource\d3d12_render_atom.h" />
+    <ClInclude Include="resource\d3d12_render_resource.h" />
+    <ClInclude Include="resource\d3d12_render_target.h" />
+    <ClInclude Include="resource\d3d12_texture.h" />
     <ClInclude Include="resource\pipeline_state_object.h" />
     <ClInclude Include="resource\placed_gpu_resource.h" />
     <ClInclude Include="resource\texture.h" />
@@ -44,12 +49,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="memory\first_fit_allocator.cpp" />
-    <ClCompile Include="primitive.cpp" />
     <ClCompile Include="renderer\command_list_factory.cpp" />
     <ClCompile Include="renderer\online_descriptor_heap.cpp" />
     <ClCompile Include="renderer\render_atom.cpp" />
     <ClCompile Include="renderer\render_context.cpp" />
-    <ClCompile Include="renderer\render_device.cpp" />
+    <ClCompile Include="renderer\d3d12_render_device.cpp" />
     <ClCompile Include="renderer\render_resource_context.cpp" />
     <ClCompile Include="renderer\render_tasks.cpp" />
     <ClCompile Include="renderer\resource_manager.cpp" />

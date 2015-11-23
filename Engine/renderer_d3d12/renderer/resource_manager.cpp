@@ -1,13 +1,16 @@
 #include "resource_manager.h"
-#include "render_device.h"
+#include "d3d12_render_device.h"
+#include "render_atom.h"
 
-#include <renderer_d3d12/renderer/render_atom.h>
 #include <d3dcompiler.h>
- 
 #include <math/hash.h>
 
 namespace ue
 {
+
+extern unsigned __cbv_srv_uav_descriptor_increment_size = 0;
+extern unsigned __sampler_descriptor_increment_size = 0;
+
 
 template<typename T>
 T* offset_ptr(void *ptr, unsigned index) {
@@ -62,6 +65,10 @@ ResourceManager::ResourceManager(D3D12RenderDevice & render_device)
 	, _dsv_heap(*render_device.device(), D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, 1)
 {
 	ID3D12Device * device = render_device.device();
+
+	__cbv_srv_uav_descriptor_increment_size = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	__sampler_descriptor_increment_size = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+	
 
 	// Create resource heap
 	{

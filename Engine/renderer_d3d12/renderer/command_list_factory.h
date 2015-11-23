@@ -2,10 +2,9 @@
 
 #include <d3d12.h>
 #include <core/platform/platform.h>
-
-#include <renderer_d3d12/renderer/command_list.h>
-#include <renderer_d3d12/renderer/render_device.h>
 #include <renderer_d3d12/com/com_ptr.h>
+#include "command_list.h"
+#include "d3d12_render_device.h"
 #include <vector>
 #include <queue>
 #include <atomic>

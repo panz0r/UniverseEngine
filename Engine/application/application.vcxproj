@@ -28,6 +28,9 @@
     <ProjectReference Include="..\core\core.vcxproj">
       <Project>{b0c87c07-2fa9-4965-8e05-7f02fe58d1de}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\renderer\renderer.vcxproj">
+      <Project>{184bada5-c370-40bf-8696-2e4138510e1e}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\renderer_d3d12\renderer_d3d12.vcxproj">
       <Project>{ccc98f37-7886-43d7-9e50-306aaba81aa4}</Project>
     </ProjectReference>

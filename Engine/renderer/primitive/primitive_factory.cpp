@@ -1,5 +1,8 @@
-#include "primitive.h"
+#include "primitive_factory.h"
 #include <string.h>
+
+namespace ue
+{
 
 PrimitiveFactory::PrimitiveFactory()
 {
@@ -93,4 +96,7 @@ void PrimitiveFactory::cube(float *vertices, unsigned &n_verts, unsigned short *
 		store(ind, index_buffer[3]);
 		n_indices += 6;
 	}
+}
+
+
 }

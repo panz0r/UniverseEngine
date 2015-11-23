@@ -2,7 +2,8 @@
 
 #include <math/math_types.h>
 
-using namespace ue;
+namespace ue
+{
 
 enum class CubeFace : int
 {
@@ -94,3 +95,5 @@ private:
 	Vector4 _cube_colors[6];
 
 };
+
+}
