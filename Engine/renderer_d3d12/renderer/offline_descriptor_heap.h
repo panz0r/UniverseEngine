@@ -14,14 +14,8 @@ namespace ue
 struct OfflineDescriptorHeapHandle
 {
 	enum { INDEX_BIT = 20, COUNTER_BIT = 12 };
-	OfflineDescriptorHeapHandle() : _index(0), _counter(0) {}
-	OfflineDescriptorHeapHandle(unsigned index, unsigned counter)
-		: _index(index)
-		, _counter(counter)
-	{}
-
-	unsigned _index : INDEX_BIT;
-	unsigned _counter : COUNTER_BIT;
+	unsigned index : INDEX_BIT;
+	unsigned counter : COUNTER_BIT;
 };
 
 
@@ -40,7 +34,6 @@ public:
 	{
 	}
 
-
 	OfflineDescriptorHeapHandle aquire_handle()
 	{
 		unsigned index = _next_free_index;
@@ -56,7 +49,7 @@ public:
 		UASSERT(entry.next_free != HandleEntry::IN_USE, "handle in use");
 		_next_free_index = entry.next_free;
 
-		// find free heap slot
+		// find free heap offset
 		if (entry.heap_index == HandleEntry::UNINITIALIZED) {
 			unsigned heap_index = 0;
 			Heap &heap = find_or_create_heap(heap_index);
@@ -68,21 +61,23 @@ public:
 		entry.counter = (entry.counter + 1) % (1 << OfflineDescriptorHeapHandle::COUNTER_BIT);
 		entry.next_free = HandleEntry::IN_USE;
 
-		OfflineDescriptorHeapHandle handle(index, entry.counter);
+
+//		OfflineDescriptorHeapHandle handle(index, entry.counter);
+		OfflineDescriptorHeapHandle handle = { index, entry.counter };
 		return handle;
 	}
 
 	void release_handle(OfflineDescriptorHeapHandle handle)
 	{
-		HandleEntry &entry = _handles[handle._index];
+		HandleEntry &entry = _handles[handle.index];
 		entry.next_free = _next_free_index;
-		_next_free_index = handle._index;
+		_next_free_index = handle.index;
 	}
 
 	D3D12_CPU_DESCRIPTOR_HANDLE cpu_descriptor_handle(OfflineDescriptorHeapHandle handle, unsigned offset = 0) const
 	{
-		const HandleEntry &entry = _handles[handle._index];
-		UASSERT(entry.counter == handle._counter, "invalid handle");
+		const HandleEntry &entry = _handles[handle.index];
+		UASSERT(entry.counter == handle.counter, "invalid handle");
 		UASSERT(entry.next_free == HandleEntry::IN_USE, "handle was released");
 
 		const Heap &heap = get_heap(entry.heap_index);
@@ -92,8 +87,8 @@ public:
 
 	D3D12_GPU_DESCRIPTOR_HANDLE gpu_descriptor_handle(OfflineDescriptorHeapHandle handle, unsigned offset = 0) const
 	{
-		const HandleEntry &entry = _handles[handle._index];
-		UASSERT(entry.counter == handle._counter, "invalid handle");
+		const HandleEntry &entry = _handles[handle.index];
+		UASSERT(entry.counter == handle.counter, "invalid handle");
 		UASSERT(entry.next_free == HandleEntry::IN_USE, "handle was released");
 		const Heap &heap = get_heap(entry.heap_index);
 

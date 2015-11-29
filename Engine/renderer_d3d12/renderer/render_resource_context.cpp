@@ -35,7 +35,7 @@ void RenderResourceContext::add_resource(ID3D12Resource * resource, const D3D12_
 	};
 	_upload_queue.push_back(upload_resource);
 
-	// compute required size of upload heap
+	// compute required count of upload heap
 	_required_size = ALIGN(_required_size, align);
 	_required_size += size;
 }

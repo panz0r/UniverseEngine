@@ -17,6 +17,7 @@
 #include <vector>
 #include <atomic>
 
+#include "../resource/d3d12_buffer.h"
 
 
 namespace ue
@@ -56,6 +57,7 @@ public:
 	RenderHandle create_vertex_buffer(const BufferDesc &desc, const void *data, RenderResourceContext &rrc);
 	RenderHandle create_index_buffer(const BufferDesc &desc, const void *data, RenderResourceContext &rrc);
 	RenderHandle create_constant_buffer(const BufferDesc &desc, const void *data, RenderResourceContext &rrc);
+	RenderHandle create_constant_buffer_2(const BufferDesc &desc, const void *data, RenderResourceContext &rrc);
 	RenderHandle create_render_target_from_resource(ID3D12Resource *resource);
 	RenderHandle create_render_target(const RenderTargetDesc &desc, RenderResourceContext &rrc);
 	RenderHandle create_pipeline_state_object(const PipelineStateObjectDesc &desc);
@@ -71,6 +73,9 @@ private:
 	HandleContainer<BufferResource*> _buffers;
 	HandleContainer<PipelineStateResource*> _pipeline_states;
 	HandleContainer<RenderAtom*> _render_atoms;
+
+	std::vector<D3D12DynamicBuffer> _dynamic_buffers;
+	std::vector<unsigned> _free_dynamic_buffers;
 
 	OfflineDescriptorHeap _srv_uav_cbv_offline_heap;
 	OfflineDescriptorHeap _frame_srv_uav_cbv_offline_heap;

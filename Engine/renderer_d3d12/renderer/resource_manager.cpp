@@ -216,7 +216,7 @@ RenderHandle ResourceManager::create_texture(ID3D12GraphicsCommandList *command_
 	ID3D12Device *device = _render_device.device();
 
 	// Alloc gpu memory
-	unsigned required_resource_size = desc.width * desc.height * sizeof(unsigned); // Todo: actual pixel size
+	unsigned required_resource_size = desc.width * desc.height * sizeof(unsigned); // Todo: actual pixel count
 
 	PlacedGPUResource placed_resource(&_resource_allocator, required_resource_size);
 
@@ -234,7 +234,7 @@ RenderHandle ResourceManager::create_texture(ID3D12GraphicsCommandList *command_
 	// Setup sub resource data
 	D3D12_SUBRESOURCE_DATA sub_resource_data = {};
 	sub_resource_data.pData = data;
-	sub_resource_data.RowPitch = desc.width * sizeof(unsigned); // TODO: use real pixel size
+	sub_resource_data.RowPitch = desc.width * sizeof(unsigned); // TODO: use real pixel count
 	sub_resource_data.SlicePitch = desc.height * sub_resource_data.RowPitch;
 
 	// Make sure upload heap offset is properly aligned for texture upload
@@ -538,6 +538,46 @@ RenderHandle ResourceManager::create_constant_buffer(const BufferDesc &desc, con
 
 }
 
+RenderHandle ResourceManager::create_constant_buffer_2(const BufferDesc &desc, const void *data, RenderResourceContext &rrc)
+{
+	ID3D12Device *device = _render_device.device();
+	
+
+	unsigned handle_count = desc.dynamic ? _render_device.back_buffer_count() : 1;
+
+	unsigned required_resource_size = ALIGN(desc.size, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+	
+	D3D12DynamicBuffer buffer = {};
+	
+	buffer.data = reinterpret_cast<void*>(reinterpret_cast<size_t>(_cb_mapped_data) + _cb_heap_offset);
+	buffer.aligned_size = required_resource_size;
+	buffer.size = desc.size;
+
+	OfflineDescriptorHeap *descriptor_heap = desc.dynamic ? &_frame_srv_uav_cbv_offline_heap : &_srv_uav_cbv_offline_heap;
+	OfflineDescriptorHeapHandle handle = descriptor_heap->aquire_handle();
+
+	buffer.cbv = handle;
+	
+	D3D12_GPU_VIRTUAL_ADDRESS gpu_vaddress = _cb_heap->GetGPUVirtualAddress() + _cb_heap_offset;
+	D3D12_CPU_DESCRIPTOR_HANDLE descriptor_handle = descriptor_heap->cpu_descriptor_handle(handle);
+	for (unsigned i = 0; i < handle_count; ++i) {
+		D3D12_CONSTANT_BUFFER_VIEW_DESC cbv_desc = {};
+		cbv_desc.BufferLocation = gpu_vaddress;
+		cbv_desc.SizeInBytes = required_resource_size;
+
+		device->CreateConstantBufferView(&cbv_desc, descriptor_handle);
+
+		_cb_heap_offset += required_resource_size;
+		gpu_vaddress += required_resource_size;
+		descriptor_handle.ptr += __cbv_srv_uav_descriptor_increment_size;
+	}
+
+	unsigned index = _dynamic_buffers.size();
+	_dynamic_buffers.push_back(buffer);
+	return RenderHandle();
+}
+
+
 RenderHandle ResourceManager::create_render_atom(const InstancedRenderAtomDesc &desc, unsigned root_parameter_count, RootParameterDesc * root_parameters, RootParameterValue * root_values)
 {
 	size_t required_size = sizeof(InstancedRenderAtom);
@@ -578,7 +618,7 @@ RenderHandle ResourceManager::create_render_atom(const InstancedRenderAtomDesc &
 		}
 	}
 
-	// check size
+	// check count
 	InstancedRenderAtom *render_atom = resource_new<InstancedRenderAtom>(required_size);
 	render_atom->size = required_size;
 

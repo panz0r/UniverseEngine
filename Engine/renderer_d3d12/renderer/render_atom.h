@@ -79,7 +79,7 @@ struct RootParameterDescriptorTable
 struct RootParameter
 {
 	enum { ROOT_CONSTANT, ROOT_MULTIPLE_CONSTANTS, ROOT_CBV, ROOT_SRV, ROOT_UAV, ROOT_DESCRIPTOR_TABLE, ROOT_DESCRIPTOR_TABLE_SAMPLER };
-	unsigned size; // full size of root parameter + data
+	unsigned size; // full count of root parameter + data
 	unsigned index;
 	unsigned type;
 	unsigned hash;	// hash of this bind point, to determine if the root parameter needs to be rebound or not
@@ -88,7 +88,7 @@ struct RootParameter
 
 struct RenderAtom : public RenderResource
 {
-	size_t size;	// size of entire render atom
+	size_t size;	// count of entire render atom
 };
 
 _declspec(align(8)) struct InstancedRenderAtom : public RenderAtom

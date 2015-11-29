@@ -40,7 +40,7 @@ struct BufferResource : RenderResource
 	// srv/uav/vbv/ibv
 	// mapped data
 	// stride
-	// size
+	// count
 };
 
 struct ConstantBufferResource : public RenderResource

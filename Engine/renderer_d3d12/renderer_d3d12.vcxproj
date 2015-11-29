@@ -21,9 +21,13 @@
   <ItemGroup>
     <ClInclude Include="com\com_ptr.h" />
     <ClInclude Include="d3dx12.h" />
+    <ClInclude Include="memory\d3d12_allocator.h" />
+    <ClInclude Include="memory\d3d12_allocator_interface.h" />
     <ClInclude Include="memory\first_fit_allocator.h" />
+    <ClInclude Include="memory\d3d12_best_fit_allocator.h" />
     <ClInclude Include="renderer\command_list.h" />
     <ClInclude Include="renderer\command_list_factory.h" />
+    <ClInclude Include="renderer\d3d12_command_list.h" />
     <ClInclude Include="renderer\offline_descriptor_heap.h" />
     <ClInclude Include="renderer\online_descriptor_heap.h" />
     <ClInclude Include="renderer\render_atom.h" />
@@ -37,6 +41,7 @@
     <ClInclude Include="resource\common.h" />
     <ClInclude Include="resource\d3d12_buffer.h" />
     <ClInclude Include="resource\d3d12_constant_buffer.h" />
+    <ClInclude Include="resource\d3d12_offline_descriptor_heap.h" />
     <ClInclude Include="resource\d3d12_pipeline_state_object.h" />
     <ClInclude Include="resource\d3d12_render_atom.h" />
     <ClInclude Include="resource\d3d12_render_resource.h" />
@@ -48,6 +53,8 @@
     <ClInclude Include="resource\buffer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="memory\d3d12_allocator.cpp" />
+    <ClCompile Include="memory\d3d12_best_fit_allocator.cpp" />
     <ClCompile Include="memory\first_fit_allocator.cpp" />
     <ClCompile Include="renderer\command_list_factory.cpp" />
     <ClCompile Include="renderer\online_descriptor_heap.cpp" />
@@ -57,6 +64,7 @@
     <ClCompile Include="renderer\render_resource_context.cpp" />
     <ClCompile Include="renderer\render_tasks.cpp" />
     <ClCompile Include="renderer\resource_manager.cpp" />
+    <ClCompile Include="resource\d3d12_offline_descriptor_heap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\math\math.vcxproj">

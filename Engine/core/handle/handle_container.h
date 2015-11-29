@@ -112,10 +112,10 @@ private:
 
 	//inline bool get_ptr(Handle handle, T* ptr)
 	//{
-	//	unsigned index = handle._index;
+	//	unsigned index = handle.index;
 	//	HandleEntry& entry = _handles[index];
 	//	if (entry._in_use == FALSE ||
-	//		entry._counter != handle._counter)
+	//		entry.counter != handle.counter)
 	//		return false;
 
 	//	*ptr = entry._data;
