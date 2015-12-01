@@ -1,8 +1,7 @@
 #pragma once
 
 #include "d3d12_render_resource.h"
-#include "placed_gpu_resource.h"
-#include "../renderer/offline_descriptor_heap.h"
+#include "d3d12_placed_resource.h"
 
 namespace ue
 {
@@ -11,12 +10,12 @@ namespace ue
 // Normally double buffered and can be updated directly through the data mapping
 struct D3D12DynamicBuffer : public D3D12RenderResource
 {
-	D3D12_GPU_VIRTUAL_ADDRESS gpu_virtual_address;
+	D3D12ResourceAllocation resource_allocation;
 	union {
-		OfflineDescriptorHeapHandle cbv;
+		D3D12DescriptorAllocation cbv_allocation;
 		struct _SRV_UAV {
-			OfflineDescriptorHeapHandle srv;
-			OfflineDescriptorHeapHandle uav;
+			D3D12DescriptorAllocation srv_allocation;
+			D3D12DescriptorAllocation uav_allocation;
 		} srv_uav;
 	};
 	void * data;
@@ -28,17 +27,17 @@ struct D3D12DynamicBuffer : public D3D12RenderResource
 // Can still be updated using the update sub resource API
 struct D3D12StaticBuffer : public D3D12RenderResource
 {
-	PlacedGPUResource gpu_placed_resource;
+	D3D12PlacedResource placed_resource;
 	union {
 		struct _Vertex_Index {
 			D3D12_VERTEX_BUFFER_VIEW vbv;
 			D3D12_INDEX_BUFFER_VIEW ibv;
 		} view;
 		union {
-			OfflineDescriptorHeapHandle cbv;
+			D3D12DescriptorAllocation cbv_allocation;
 			struct _SRV_UAV {
-				OfflineDescriptorHeapHandle srv;
-				OfflineDescriptorHeapHandle uav;
+				D3D12DescriptorAllocation srv_allocation;
+				D3D12DescriptorAllocation uav_allocation;
 			} srv_uav;
 		};
 	};

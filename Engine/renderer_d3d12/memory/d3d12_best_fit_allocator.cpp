@@ -28,7 +28,7 @@ D3D12Allocation D3D12BestFitAllocator::allocate(unsigned slot_count)
 	return make_allocation(entry, slot_count);
 }
 
-void D3D12BestFitAllocator::deallocate(D3D12Allocation allocation)
+void D3D12BestFitAllocator::deallocate(const D3D12Allocation& allocation)
 {
 	Entry* entry = free_list_begin();
 	while (entry)

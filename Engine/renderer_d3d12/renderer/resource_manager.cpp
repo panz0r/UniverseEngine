@@ -69,18 +69,44 @@ ResourceManager::ResourceManager(D3D12RenderDevice & render_device)
 	__cbv_srv_uav_descriptor_increment_size = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	__sampler_descriptor_increment_size = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 	
-
-	// Create resource heap
 	{
-		const uint64_t size = 1024 * 1024 * 128;
-		D3D12_HEAP_DESC desc = {};
-		desc.Alignment = 0;
-		desc.Flags = D3D12_HEAP_FLAG_NONE;// D3D12_HEAP_FLAG_ALLOW_ALL_BUFFERS_AND_TEXTURES;
-		desc.Properties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-		desc.SizeInBytes = size;
-		HRESULT hr = device->CreateHeap(&desc, IID_PPV_ARGS(&_resource_heap));
-		UENSURE(SUCCEEDED(hr));
-		_resource_allocator.initialize(nullptr, size, 65536);
+		D3D12DescriptorAllocatorDesc desc;
+		desc.flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		desc.type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		desc.size = 128;
+		_cbv_srv_uav_descriptor_allocator = new D3D12DescriptorAllocator(device, desc);
+
+		desc.type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
+		desc.size = 32;
+		_sampler_descriptor_allocator = new D3D12DescriptorAllocator(device, desc);
+
+		desc.type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+		desc.size = 32;
+		_rtv_descriptor_allocator = new D3D12DescriptorAllocator(device, desc);
+
+		desc.type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+		desc.size = 16;
+		_dsv_descriptor_allocator = new D3D12DescriptorAllocator(device, desc);
+	}
+
+	{
+		D3D12AllocatorDesc desc;
+		desc.size = 1024 * 1024 * 128;
+		desc.alignment = 1024 * 64;
+		desc.slot_size = 1024 * 64;
+		desc.flags = D3D12_HEAP_FLAG_NONE;
+		desc.type = D3D12_HEAP_TYPE_DEFAULT;
+		_placement_resource_heap_allocator = new D3D12HeapAllocator(device, desc);
+	}
+	
+	{
+		D3D12AllocatorDesc desc;
+		desc.size = 1024 * 1024 * 128;
+		desc.alignment = D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
+		desc.slot_size = D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
+		desc.flags = D3D12_HEAP_FLAG_NONE;
+		desc.type = D3D12_HEAP_TYPE_UPLOAD;
+		_cb_heap_allocator = new D3D12ResourceAllocator(device, desc);
 	}
 
 	// Create upload heap
@@ -94,20 +120,6 @@ ResourceManager::ResourceManager(D3D12RenderDevice & render_device)
 			IID_PPV_ARGS(&_upload_heap));
 		UENSURE(SUCCEEDED(hr));
 		_upload_heap_offset = 0;
-	}
-
-	// Create cb heap
-	{
-		const uint64_t size = 1024 * 1024 * 64;
-		HRESULT hr = device->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-			D3D12_HEAP_FLAG_NONE,
-			&CD3DX12_RESOURCE_DESC::Buffer(size),
-			D3D12_RESOURCE_STATE_GENERIC_READ,
-			nullptr,
-			IID_PPV_ARGS(&_cb_heap));
-		UENSURE(SUCCEEDED(hr));
-		_cb_heap_offset = 0;
-		_cb_heap->Map(0, nullptr, &_cb_mapped_data);
 	}
 
 	{
@@ -182,25 +194,9 @@ T* allocate_resource(unsigned buffer_count)
 }
 
 
-RenderHandle ResourceManager::create_texture(ID3D12GraphicsCommandList *command_list, const TextureDesc &desc, const void *data)
+RenderHandle ResourceManager::create_texture(ID3D12GraphicsCommandList *command_list, const D3D12TextureDesc &desc, const void *data)
 {
-	size_t required_size = sizeof(TextureResource);
-
 	unsigned handle_count = desc.dynamic ? _render_device.back_buffer_count() : 1;
-	required_size += sizeof(D3D12_CPU_DESCRIPTOR_HANDLE) * handle_count;
-	required_size += sizeof(OfflineDescriptorHeapHandle) * handle_count;
-	// Todo, UAV access
-
-	// Alloc enough memory to hold all required data
-	TextureResource *texture = resource_new<TextureResource>(required_size);
-
-	// fixup pointers
-	char *ptr = ((char*)texture) + sizeof(TextureResource);
-	texture->handles = (OfflineDescriptorHeapHandle*)ptr;
-	ptr += sizeof(OfflineDescriptorHeapHandle) * handle_count;
-	texture->srv = (D3D12_CPU_DESCRIPTOR_HANDLE*)ptr;
-	ptr += sizeof(D3D12_CPU_DESCRIPTOR_HANDLE) * handle_count;
-
 
 	D3D12_RESOURCE_DESC resource_desc = {};
 	resource_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
@@ -218,18 +214,21 @@ RenderHandle ResourceManager::create_texture(ID3D12GraphicsCommandList *command_
 	// Alloc gpu memory
 	unsigned required_resource_size = desc.width * desc.height * sizeof(unsigned); // Todo: actual pixel count
 
-	PlacedGPUResource placed_resource(&_resource_allocator, required_resource_size);
+	auto resource_allocator = _placement_resource_heap_allocator;
 
-	HRESULT hr = device->CreatePlacedResource(_resource_heap.Get(),
-		placed_resource.offset(),
+	D3D12Texture texture = {};
+	texture.placed_resource.allocation = resource_allocator->allocate(required_resource_size);
+
+	HRESULT hr = device->CreatePlacedResource(resource_allocator->get_heap(texture.placed_resource.allocation),
+		resource_allocator->get_offset(texture.placed_resource.allocation),
 		&resource_desc,
 		D3D12_RESOURCE_STATE_COPY_DEST,
 		nullptr,
-		IID_PPV_ARGS(placed_resource.init_resource()));
+		IID_PPV_ARGS(&texture.placed_resource.resource));
 	UENSURE(SUCCEEDED(hr));
 
 	// validate memory footprint
-	UENSURE(GetRequiredIntermediateSize(placed_resource.resource(), 0, 1) == required_resource_size);
+	UENSURE(GetRequiredIntermediateSize(texture.placed_resource.resource.Get(), 0, 1) == required_resource_size);
 
 	// Setup sub resource data
 	D3D12_SUBRESOURCE_DATA sub_resource_data = {};
@@ -241,8 +240,19 @@ RenderHandle ResourceManager::create_texture(ID3D12GraphicsCommandList *command_
 	_upload_heap_offset = ALIGN(_upload_heap_offset, D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT);
 
 	// commit upload command to command list and set initial resource barrier accordingly
-	UpdateSubresources(command_list, placed_resource.resource(), _upload_heap.Get(), _upload_heap_offset, 0, 1, &sub_resource_data);
-	command_list->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(placed_resource.resource(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE));
+	UpdateSubresources(command_list, 
+		texture.placed_resource.resource.Get(), 
+		_upload_heap.Get(), 
+		_upload_heap_offset, 
+		0, 
+		1, 
+		&sub_resource_data);
+
+	command_list->ResourceBarrier(1, 
+		&CD3DX12_RESOURCE_BARRIER::Transition(texture.placed_resource.resource.Get(), 
+			D3D12_RESOURCE_STATE_COPY_DEST, 
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE)
+		);
 	_upload_heap_offset += required_resource_size;
 
 	// Setup shader resource view
@@ -252,66 +262,46 @@ RenderHandle ResourceManager::create_texture(ID3D12GraphicsCommandList *command_
 	srv_desc.Texture2D.MipLevels = desc.mip_levels;
 	srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
-	// aquire new handle from offline descriptor heap
-	OfflineDescriptorHeapHandle descriptor_heap_handle = _srv_uav_cbv_offline_heap.aquire_handle();
-	memcpy(texture->handles, &descriptor_heap_handle, sizeof(OfflineDescriptorHeapHandle));
+	texture.srv_descriptor = _cbv_srv_uav_descriptor_allocator->allocate(handle_count);
 
 	// create cpu descriptor handle for resource
-	D3D12_CPU_DESCRIPTOR_HANDLE srv_handle = _srv_uav_cbv_offline_heap.cpu_descriptor_handle(descriptor_heap_handle);
-	device->CreateShaderResourceView(texture->placed_resource.resource(), &srv_desc, srv_handle);
-
-	// copy handle data to resource part
-	memcpy(texture->srv, &srv_handle, sizeof(D3D12_CPU_DESCRIPTOR_HANDLE));
-
-	Handle texture_handle = _textures.insert(texture, RenderResource::Texture);
-	return texture_handle;
+	device->CreateShaderResourceView(texture.placed_resource.resource.Get(), 
+		&srv_desc, 
+		_cbv_srv_uav_descriptor_allocator->get_cpu_handle(texture.srv_descriptor));
+	
+	_textures.push_back(texture);
+	return RenderHandle();
 }
 
 void ResourceManager::destroy_texture(RenderHandle handle)
 {
-	TextureResource *texture = _textures.get_ptr<TextureResource>(handle);
-	_srv_uav_cbv_offline_heap.release_handle(*texture->handles);
-	_textures.remove(handle);
-	
-	texture->placed_resource.deallocate();
-	texture->~TextureResource();
-
-	free(texture);
 }
 
-RenderHandle ResourceManager::create_render_target(const RenderTargetDesc &desc, RenderResourceContext &rrc)
+RenderHandle ResourceManager::create_render_target(const D3D12RenderTargetDesc &desc, RenderResourceContext &rrc)
 {
-	size_t required_size = sizeof(RenderTargetResource);
-	required_size += sizeof(D3D12_CPU_DESCRIPTOR_HANDLE);
-	required_size += sizeof(OfflineDescriptorHeapHandle);
-
-	RenderTargetResource *rt = resource_new<RenderTargetResource>(required_size);
-
-	char *ptr = ((char*)rt) + sizeof(RenderTargetResource);
-	rt->handle = (OfflineDescriptorHeapHandle*)ptr;
-	ptr += sizeof(OfflineDescriptorHeapHandle);
-	rt->rtv = (D3D12_CPU_DESCRIPTOR_HANDLE*)ptr;
-
 	ID3D12Device *device = _render_device.device();
-	OfflineDescriptorHeapHandle descriptor_heap_handle;
+	D3D12RenderTarget render_target = {};
+
 	if (desc.depth_stencil) {
 		HRESULT hr = device->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE,
 			&CD3DX12_RESOURCE_DESC::Tex2D(format_lut[desc.format], desc.width, desc.height, 1U, 0U, 1U, 0U, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL),
 			D3D12_RESOURCE_STATE_DEPTH_WRITE,
 			&CD3DX12_CLEAR_VALUE(format_lut[desc.format], 1.f, 0),
-			IID_PPV_ARGS(&rt->resource));
+			IID_PPV_ARGS(&render_target.resource));
 		UENSURE(SUCCEEDED(hr));
 
-		rt->current_state = RenderTargetResource::DEPTH_WRITE;
-		descriptor_heap_handle = _dsv_heap.aquire_handle();
+		render_target.resource_state = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 
-		D3D12_CPU_DESCRIPTOR_HANDLE dsv_handle = _dsv_heap.cpu_descriptor_handle(descriptor_heap_handle);
+		render_target.dsv_descriptor = _dsv_descriptor_allocator->allocate(1);
+
 		D3D12_DEPTH_STENCIL_VIEW_DESC dsv_desc = {};
 		dsv_desc.Format = format_lut[desc.format];
 		dsv_desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-		device->CreateDepthStencilView(rt->resource.Get(), &dsv_desc, dsv_handle);
-		memcpy(rt->dsv, &dsv_handle, sizeof(D3D12_CPU_DESCRIPTOR_HANDLE));
+
+		device->CreateDepthStencilView(render_target.resource.Get(), 
+			&dsv_desc, 
+			_dsv_descriptor_allocator->get_cpu_handle(render_target.dsv_descriptor));
 	}
 	else {
 		const float opt_clear[] = { 0,0,0,0 };
@@ -320,263 +310,167 @@ RenderHandle ResourceManager::create_render_target(const RenderTargetDesc &desc,
 			&CD3DX12_RESOURCE_DESC::Tex2D(format_lut[desc.format], desc.width, desc.height, 1U, 0U, 1U, 0U, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET),
 			D3D12_RESOURCE_STATE_RENDER_TARGET,
 			&CD3DX12_CLEAR_VALUE(format_lut[desc.format], opt_clear),
-			IID_PPV_ARGS(&rt->resource));
+			IID_PPV_ARGS(&render_target.resource));
 		UENSURE(SUCCEEDED(hr));
-		descriptor_heap_handle = _rtv_heap.aquire_handle();
-		rt->current_state = RenderTargetResource::RENDER_TARGET;
+
+		render_target.rtv_descriptor = _rtv_descriptor_allocator->allocate(1);
+		render_target.resource_state = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
 
-		D3D12_CPU_DESCRIPTOR_HANDLE rtv_handle = _rtv_heap.cpu_descriptor_handle(descriptor_heap_handle);
 		D3D12_RENDER_TARGET_VIEW_DESC rtv_desc = {};
 		rtv_desc.Format = format_lut[desc.format];
 		rtv_desc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-		device->CreateRenderTargetView(rt->resource.Get(), &rtv_desc, rtv_handle);
-		memcpy(rt->rtv, &rtv_handle, sizeof(D3D12_CPU_DESCRIPTOR_HANDLE));
+		device->CreateRenderTargetView(render_target.resource.Get(), 
+			&rtv_desc, 
+			_rtv_descriptor_allocator->get_cpu_handle(render_target.rtv_descriptor));
 	}
 
-	memcpy(rt->handle, &descriptor_heap_handle, sizeof(OfflineDescriptorHeapHandle));
+	_render_targets.push_back(render_target);
 
-
-	RenderHandle rt_handle = _render_targets.insert(rt, RenderResource::RenderTarget);
-	return rt_handle;
+	return RenderHandle();
 }
 
 RenderHandle ResourceManager::create_render_target_from_resource(ID3D12Resource *resource)
 {
-	size_t required_size = sizeof(RenderTargetResource);
-
-	required_size += sizeof(D3D12_CPU_DESCRIPTOR_HANDLE);
-	required_size += sizeof(OfflineDescriptorHeapHandle);
-
-	// Alloc enough memory to hold all required data
-	RenderTargetResource *rt = resource_new<RenderTargetResource>(required_size);
-
-	// fixup pointers
-	char *ptr = ((char*)rt) + sizeof(RenderTargetResource);
-	rt->handle = (OfflineDescriptorHeapHandle*)ptr;
-	ptr += sizeof(OfflineDescriptorHeapHandle);
-	rt->rtv = (D3D12_CPU_DESCRIPTOR_HANDLE*)ptr;
-	ptr += sizeof(D3D12_CPU_DESCRIPTOR_HANDLE);
-
-
-	// aquire new handle from offline descriptor heap
-	OfflineDescriptorHeapHandle descriptor_heap_handle = _rtv_heap.aquire_handle();
-	memcpy(rt->handle, &descriptor_heap_handle, sizeof(OfflineDescriptorHeapHandle));
-
 	ID3D12Device *device = _render_device.device();
-	rt->resource = ComPtr<ID3D12Resource>(resource);
+	
+	D3D12RenderTarget render_target = {};
+	render_target.resource_state = D3D12_RESOURCE_STATE_PRESENT;
+	render_target.rtv_descriptor = _rtv_descriptor_allocator->allocate(1);
+	render_target.resource = ComPtr<ID3D12Resource>(resource);
 
 	// create cpu descriptor handle for resource
-	D3D12_CPU_DESCRIPTOR_HANDLE rtv_handle = _rtv_heap.cpu_descriptor_handle(descriptor_heap_handle);
-	device->CreateRenderTargetView(rt->resource.Get(), nullptr, rtv_handle);
+	device->CreateRenderTargetView(render_target.resource.Get(), 
+		nullptr, 
+		_rtv_descriptor_allocator->get_cpu_handle(render_target.rtv_descriptor));
 
-	// copy handle data to resource part
-	memcpy(rt->rtv, &rtv_handle, sizeof(D3D12_CPU_DESCRIPTOR_HANDLE));
-	rt->current_state = RenderTargetResource::PRESENT;
-
-	RenderHandle rt_handle = _render_targets.insert(rt, RenderResource::RenderTarget);
-	return rt_handle;
+	_render_targets.push_back(render_target);
+	return RenderHandle();
 }
 
 
 RenderHandle ResourceManager::create_vertex_buffer(const BufferDesc &desc, const void *data, RenderResourceContext &rrc)
 {
 	ID3D12Device *device = _render_device.device();
-
-	size_t required_size = sizeof(BufferResource);
-	unsigned handle_count = desc.dynamic ? _render_device.back_buffer_count() : 1;
-	required_size += sizeof(D3D12_VERTEX_BUFFER_VIEW) * handle_count;
-	// Alloc enough memory to hold all required data
-
-	BufferResource *buffer = resource_new<BufferResource>(required_size);
-
-	// fixup pointers
-	char *ptr = ((char*)buffer) + sizeof(BufferResource);
-	//buffer->handles = (OfflineDescriptorHeapHandle*)ptr;
-	//ptr += sizeof(OfflineDescriptorHeapHandle) * handle_count;
-	buffer->srv = nullptr; //
-	buffer->uav = nullptr;
-	buffer->vbv = (D3D12_VERTEX_BUFFER_VIEW*)ptr;
 	
 
 	// Alloc gpu memory
 	unsigned required_resource_size = desc.size;
-	PlacedGPUResource placed_resource(&_resource_allocator, required_resource_size);
+	
+	D3D12HeapAllocation heap_allocation = _placement_resource_heap_allocator->allocate(required_resource_size);
+	ID3D12Heap* heap = _placement_resource_heap_allocator->get_heap(heap_allocation);
+	D3D12HeapOffset heap_offset = _placement_resource_heap_allocator->get_offset(heap_allocation);
+	ComPtr<ID3D12Resource> resource;
 
-	HRESULT hr = device->CreatePlacedResource(_resource_heap.Get(),
-		placed_resource.offset(),
+	HRESULT hr = device->CreatePlacedResource(heap,
+		heap_offset,
 		&CD3DX12_RESOURCE_DESC::Buffer(desc.size),
 		D3D12_RESOURCE_STATE_COPY_DEST,
 		nullptr,
-		IID_PPV_ARGS(placed_resource.init_resource()));
+		IID_PPV_ARGS(&resource));
 	UENSURE(SUCCEEDED(hr));
+	
 	// validate memory footprint
-	UENSURE(GetRequiredIntermediateSize(placed_resource.resource(), 0, 1) == required_resource_size);
+	UENSURE(GetRequiredIntermediateSize(resource.Get(), 0, 1) == required_resource_size);
 
 	// Setup sub resource data
 	D3D12_SUBRESOURCE_DATA sub_resource_data = {};
 	sub_resource_data.pData = data;
 	sub_resource_data.RowPitch = desc.size;
 		
-	rrc.add_resource(placed_resource.resource(), sub_resource_data, required_resource_size, 256, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+	rrc.add_resource(resource.Get(), sub_resource_data, required_resource_size, 256, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 
 	// Setup vertexbuffer view
 	D3D12_VERTEX_BUFFER_VIEW vbv = {};
-	vbv.BufferLocation = placed_resource.resource()->GetGPUVirtualAddress();
+	vbv.BufferLocation = resource->GetGPUVirtualAddress();
 	vbv.SizeInBytes = desc.size;
 	vbv.StrideInBytes = desc.stride;
-		
-	// copy vbv to resource
-	memcpy(buffer->vbv, &vbv, sizeof(D3D12_VERTEX_BUFFER_VIEW));
-	buffer->placed_resource = placed_resource;
+	
+	D3D12StaticBuffer buffer = {};
+	buffer.resource_state = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+	buffer.placed_resource.allocation = heap_allocation;
+	buffer.placed_resource.resource = resource;
+	buffer.view.vbv = vbv;
+	buffer.size = required_resource_size;
+	
 
-	RenderHandle buffer_handle = _buffers.insert(buffer, RenderResource::Buffer);
-	return buffer_handle;
+	return RenderHandle();
 }
 
 RenderHandle ResourceManager::create_index_buffer(const BufferDesc &desc, const void *data, RenderResourceContext &rrc)
 {
 	ID3D12Device *device = _render_device.device();
 
-	size_t required_size = sizeof(BufferResource);
-	unsigned handle_count = desc.dynamic ? _render_device.back_buffer_count() : 1;
-	required_size += sizeof(D3D12_INDEX_BUFFER_VIEW) * handle_count;
-	// Alloc enough memory to hold all required data
-	
-	BufferResource *buffer = resource_new<BufferResource>(required_size);
-
-	// fixup pointers
-	char *ptr = ((char*)buffer) + sizeof(BufferResource);
-	buffer->srv = nullptr; 
-	buffer->uav = nullptr;
-	buffer->ibv = (D3D12_INDEX_BUFFER_VIEW*)ptr;
-
-
-	// Alloc gpu memory
 	unsigned required_resource_size = desc.size;
-	PlacedGPUResource placed_resource(&_resource_allocator, required_resource_size);
 
-	HRESULT hr = device->CreatePlacedResource(_resource_heap.Get(),
-		placed_resource.offset(),
+	D3D12HeapAllocation heap_allocation = _placement_resource_heap_allocator->allocate(required_resource_size);
+	ID3D12Heap* heap = _placement_resource_heap_allocator->get_heap(heap_allocation);
+	D3D12HeapOffset heap_offset = _placement_resource_heap_allocator->get_offset(heap_allocation);
+	ComPtr<ID3D12Resource> resource;
+
+	HRESULT hr = device->CreatePlacedResource(heap,
+		heap_offset,
 		&CD3DX12_RESOURCE_DESC::Buffer(desc.size),
 		D3D12_RESOURCE_STATE_COPY_DEST,
 		nullptr,
-		IID_PPV_ARGS(placed_resource.init_resource()));
+		IID_PPV_ARGS(&resource));
 	UENSURE(SUCCEEDED(hr));
+
 	// validate memory footprint
-	UENSURE(GetRequiredIntermediateSize(placed_resource.resource(), 0, 1) == required_resource_size);
+	UENSURE(GetRequiredIntermediateSize(resource.Get(), 0, 1) == required_resource_size);
 
 	// Setup sub resource data
 	D3D12_SUBRESOURCE_DATA sub_resource_data = {};
 	sub_resource_data.pData = data;
 	sub_resource_data.RowPitch = desc.size;
 
-	rrc.add_resource(placed_resource.resource(), sub_resource_data, required_resource_size, 256, D3D12_RESOURCE_STATE_INDEX_BUFFER);
+	rrc.add_resource(resource.Get(), sub_resource_data, required_resource_size, 256, D3D12_RESOURCE_STATE_INDEX_BUFFER);
 
 	// Setup vertexbuffer view
 	D3D12_INDEX_BUFFER_VIEW ibv = {};
-	ibv.BufferLocation = placed_resource.resource()->GetGPUVirtualAddress();
+	ibv.BufferLocation = resource->GetGPUVirtualAddress();
 	ibv.SizeInBytes = desc.size;
 	ibv.Format = (DXGI_FORMAT)desc.format;
+	
+	D3D12StaticBuffer buffer = {};
+	buffer.placed_resource.allocation = heap_allocation;
+	buffer.placed_resource.resource = resource;
+	buffer.view.ibv = ibv;
+	buffer.size = required_resource_size;
+	buffer.resource_state = D3D12_RESOURCE_STATE_INDEX_BUFFER;
 
-	// copy vbv to resource
-	memcpy(buffer->ibv, &ibv, sizeof(D3D12_INDEX_BUFFER_VIEW));
-	buffer->placed_resource = placed_resource;
-
-	RenderHandle buffer_handle = _buffers.insert(buffer, RenderResource::Buffer);
-	return buffer_handle;
+	return RenderHandle();
 }
 
 RenderHandle ResourceManager::create_constant_buffer(const BufferDesc &desc, const void *data, RenderResourceContext &rrc)
 {
 	ID3D12Device *device = _render_device.device();
 
-	size_t required_size = sizeof(ConstantBufferResource);
-	required_size += sizeof(OfflineDescriptorHeapHandle);
-	required_size += sizeof(D3D12_CPU_DESCRIPTOR_HANDLE);
-	required_size += sizeof(D3D12_GPU_VIRTUAL_ADDRESS);
-
-
-	unsigned handle_count = desc.dynamic ? _render_device.back_buffer_count() : 1;
-
-	// Alloc enough memory to hold all required data
-	ConstantBufferResource *buffer = resource_new<ConstantBufferResource>(required_size);
-
-	// fixup pointers
-	char *ptr = ((char*)buffer) + sizeof(ConstantBufferResource);
-	buffer->handle = (OfflineDescriptorHeapHandle*)ptr;
-	ptr += sizeof(OfflineDescriptorHeapHandle);
-	buffer->cbv = (D3D12_CPU_DESCRIPTOR_HANDLE*)ptr;
-	ptr += sizeof(D3D12_CPU_DESCRIPTOR_HANDLE);
-	buffer->gpu_va = (D3D12_GPU_VIRTUAL_ADDRESS*)ptr;
-	
+	unsigned buffer_count = desc.dynamic ? _render_device.back_buffer_count() : 1;
 	unsigned required_resource_size = ALIGN(desc.size, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
-
-	// setup mapped data base pointer
-	buffer->mapped_data = reinterpret_cast<void*>(reinterpret_cast<size_t>(_cb_mapped_data) + _cb_heap_offset);
-	buffer->frame_map_stride = required_resource_size;
-	buffer->size = desc.size;
-
-	OfflineDescriptorHeap *descriptor_heap = desc.dynamic ? &_frame_srv_uav_cbv_offline_heap : &_srv_uav_cbv_offline_heap;
-
-	OfflineDescriptorHeapHandle handle = descriptor_heap->aquire_handle();
-	*buffer->handle = handle;
-	*buffer->cbv = descriptor_heap->cpu_descriptor_handle(handle);
-
-	for (unsigned i = 0; i < handle_count; ++i) {
+	
+	D3D12ResourceAllocation resource_allocation = _cb_heap_allocator->allocate(required_resource_size * buffer_count);
+	void* mapped_data = _cb_heap_allocator->get_mapped_data(resource_allocation);
+	D3D12DescriptorAllocation cbv_allocation = _cbv_srv_uav_descriptor_allocator->allocate(buffer_count);
+	
+	for (unsigned i = 0; i < buffer_count; ++i) {
 		D3D12_CONSTANT_BUFFER_VIEW_DESC cbv_desc = {};
-		cbv_desc.BufferLocation = _cb_heap->GetGPUVirtualAddress() + _cb_heap_offset;
-		buffer->gpu_va[i] = cbv_desc.BufferLocation;
-
+		cbv_desc.BufferLocation = _cb_heap_allocator->get_virtual_address(resource_allocation) + (required_resource_size * i);
 		cbv_desc.SizeInBytes = required_resource_size;
-		_cb_heap_offset += required_resource_size;
-		device->CreateConstantBufferView(&cbv_desc, descriptor_heap->cpu_descriptor_handle(handle, i));
+		device->CreateConstantBufferView(&cbv_desc, _cbv_srv_uav_descriptor_allocator->get_cpu_handle(cbv_allocation, 0));
 	}
 
-	RenderHandle buffer_handle = _buffers.insert(buffer, RenderResource::ConstantBuffer);
-	return buffer_handle;
-
-}
-
-RenderHandle ResourceManager::create_constant_buffer_2(const BufferDesc &desc, const void *data, RenderResourceContext &rrc)
-{
-	ID3D12Device *device = _render_device.device();
-	
-
-	unsigned handle_count = desc.dynamic ? _render_device.back_buffer_count() : 1;
-
-	unsigned required_resource_size = ALIGN(desc.size, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
-	
 	D3D12DynamicBuffer buffer = {};
-	
-	buffer.data = reinterpret_cast<void*>(reinterpret_cast<size_t>(_cb_mapped_data) + _cb_heap_offset);
 	buffer.aligned_size = required_resource_size;
 	buffer.size = desc.size;
+	buffer.cbv_allocation = cbv_allocation;
+	buffer.data = mapped_data;
+	buffer.resource_allocation = resource_allocation;
+	buffer.resource_state = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+	buffer.type = ConstantBuffer;
 
-	OfflineDescriptorHeap *descriptor_heap = desc.dynamic ? &_frame_srv_uav_cbv_offline_heap : &_srv_uav_cbv_offline_heap;
-	OfflineDescriptorHeapHandle handle = descriptor_heap->aquire_handle();
-
-	buffer.cbv = handle;
-	
-	D3D12_GPU_VIRTUAL_ADDRESS gpu_vaddress = _cb_heap->GetGPUVirtualAddress() + _cb_heap_offset;
-	D3D12_CPU_DESCRIPTOR_HANDLE descriptor_handle = descriptor_heap->cpu_descriptor_handle(handle);
-	for (unsigned i = 0; i < handle_count; ++i) {
-		D3D12_CONSTANT_BUFFER_VIEW_DESC cbv_desc = {};
-		cbv_desc.BufferLocation = gpu_vaddress;
-		cbv_desc.SizeInBytes = required_resource_size;
-
-		device->CreateConstantBufferView(&cbv_desc, descriptor_handle);
-
-		_cb_heap_offset += required_resource_size;
-		gpu_vaddress += required_resource_size;
-		descriptor_handle.ptr += __cbv_srv_uav_descriptor_increment_size;
-	}
-
-	unsigned index = _dynamic_buffers.size();
-	_dynamic_buffers.push_back(buffer);
 	return RenderHandle();
 }
-
 
 RenderHandle ResourceManager::create_render_atom(const InstancedRenderAtomDesc &desc, unsigned root_parameter_count, RootParameterDesc * root_parameters, RootParameterValue * root_values)
 {

@@ -15,7 +15,7 @@ public:
 	~D3D12BestFitAllocator();
 
 	D3D12Allocation allocate(unsigned slot_count);
-	void deallocate(D3D12Allocation allocation);
+	void deallocate(const D3D12Allocation& allocation);
 
 private:
 	struct Entry

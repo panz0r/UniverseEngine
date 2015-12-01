@@ -21,7 +21,7 @@
 #include <math/matrix4.h>
 #include <math/matrix3.h>
 
-#include <renderer_d3d12/resource/d3d12_offline_descriptor_heap.h>
+#include <renderer_d3d12/memory/d3d12_allocator.h>
 
 namespace ue
 {
@@ -67,7 +67,12 @@ void Application::initialize()
 	CommandListFactory::thread_initialize();
 	OnlineDescriptorHeapFactory::thread_initialize(_render_device->device());
 
-	D3D12OfflineDescriptorHeap *offline = new D3D12OfflineDescriptorHeap(_render_device->device(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 8);
+	D3D12DescriptorAllocatorDesc descriptor_allocator_desc;
+	descriptor_allocator_desc.size = 8;
+	descriptor_allocator_desc.flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	descriptor_allocator_desc.type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+
+	D3D12DescriptorAllocator *offline = new D3D12DescriptorAllocator(_render_device->device(), descriptor_allocator_desc);
 
 	auto handle1 = offline->allocate(1);
 	auto handle2 = offline->allocate(2);
@@ -76,12 +81,14 @@ void Application::initialize()
 	auto handle4 = offline->allocate(7);
 	auto handle5 = offline->allocate(1);
 	auto handle6 = offline->allocate(2);
-	offline->release(handle1);
-	offline->release(handle3);
-	offline->release(handle4);
-	offline->release(handle2);
+	
+	offline->deallocate(handle1);
+	offline->deallocate(handle3);
+	offline->deallocate(handle4);
+	offline->deallocate(handle2);
 
-	auto test = offline->cpu_descriptor_handle(handle5);
+	auto test = offline->get_cpu_handle(handle32);
+
 
 
 
