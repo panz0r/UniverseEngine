@@ -1,0 +1,18 @@
+
+
+// backbuffer auto defined
+
+render_targets = {
+	// one render target
+	default = { type="render_target" format="A8R8G8B8"  fast_clear="0 0 0 0" }
+	depth_stencil_target = { type="depth_stencil" format="D32" fast_clear="0" }
+}
+
+pipeline = {
+
+	{ type="clear" render_targets="default" depth_stencil="depth_stencil_target" }
+	{ type="draw"  render_targets="default" depth_stencil="depth_stencil_target"}
+
+}
+
+
