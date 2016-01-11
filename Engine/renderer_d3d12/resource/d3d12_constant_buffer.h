@@ -7,7 +7,7 @@ namespace ue
 
 struct D3D12ConstantBuffer : public D3D12RenderResource
 {
-	
+
 	OfflineDescriptorHeapHandle cbv_descriptor_handle;
 	D3D12_GPU_VIRTUAL_ADDRESS gpu_virtual_address;
 

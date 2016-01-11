@@ -1,9 +1,8 @@
 #pragma once
-
+#include <renderer_d3d12\stdinclude.h>
 #include <core/platform/platform.h>
 #include <renderer_d3d12\com\com_ptr.h>
 #include <d3d12.h>
-#include "d3dx12.h"
 #include <assert.h>
 
 namespace ue

@@ -6,6 +6,7 @@ typedef unsigned long long uint64;
 typedef long long int64;
 
 #define __THREAD_LOCAL __declspec(thread)
+#define UE_THREAD_LOCAL __declspec(thread)
 
 namespace platform
 {

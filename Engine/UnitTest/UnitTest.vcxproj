@@ -18,114 +18,34 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="com\com_ptr.h" />
-    <ClInclude Include="d3dx12.h" />
-    <ClInclude Include="memory\d3d12_allocation.h" />
-    <ClInclude Include="memory\d3d12_allocator_interface.h" />
-    <ClInclude Include="memory\d3d12_comitted_allocator.h" />
-    <ClInclude Include="memory\d3d12_descriptor_allocator.h" />
-    <ClInclude Include="memory\d3d12_heap_allocator.h" />
-    <ClInclude Include="memory\d3d12_memory.h" />
-    <ClInclude Include="memory\d3d12_ring_allocator.h" />
-    <ClInclude Include="memory\d3d12_subresource_allocator.h" />
-    <ClInclude Include="memory\first_fit_allocator.h" />
-    <ClInclude Include="memory\d3d12_best_fit_allocator.h" />
-    <ClInclude Include="renderer\command_list.h" />
-    <ClInclude Include="renderer\command_list_factory.h" />
-    <ClInclude Include="renderer\d3d12_command_list.h" />
-    <ClInclude Include="renderer\d3d12_command_list_factory.h" />
-    <ClInclude Include="renderer\offline_descriptor_heap.h" />
-    <ClInclude Include="renderer\online_descriptor_heap.h" />
-    <ClInclude Include="renderer\render_atom.h" />
-    <ClInclude Include="renderer\render_context.h" />
-    <ClInclude Include="renderer\d3d12_render_device.h" />
-    <ClInclude Include="renderer\render_device_desc.h" />
-    <ClInclude Include="renderer\d3d12_render_resource_context.h" />
-    <ClInclude Include="renderer\render_tasks.h" />
-    <ClInclude Include="renderer\resources.h" />
-    <ClInclude Include="renderer\resource_manager.h" />
-    <ClInclude Include="resource\d3d12_buffer.h" />
-    <ClInclude Include="resource\d3d12_buffer_writer.h" />
-    <ClInclude Include="resource\d3d12_constant_buffer.h" />
-    <ClInclude Include="resource\d3d12_offline_descriptor_heap.h" />
-    <ClInclude Include="resource\d3d12_pipeline_state.h" />
-    <ClInclude Include="resource\d3d12_render_atom.h" />
-    <ClInclude Include="resource\d3d12_render_resource.h" />
-    <ClInclude Include="resource\d3d12_render_target.h" />
-    <ClInclude Include="resource\d3d12_resource.h" />
-    <ClInclude Include="resource\d3d12_resource_manager.h" />
-    <ClInclude Include="resource\d3d12_resource_storage.h" />
-    <ClInclude Include="resource\d3d12_root_signature.h" />
-    <ClInclude Include="resource\d3d12_shader.h" />
-    <ClInclude Include="resource\d3d12_shader_factory.h" />
-    <ClInclude Include="resource\d3d12_texture.h" />
-    <ClInclude Include="resource\pipeline_state_object.h" />
-    <ClInclude Include="resource\placed_gpu_resource.h" />
-    <ClInclude Include="stdinclude.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="memory\d3d12_best_fit_allocator.cpp" />
-    <ClCompile Include="memory\d3d12_comitted_allocator.cpp" />
-    <ClCompile Include="memory\d3d12_descriptor_allocator.cpp" />
-    <ClCompile Include="memory\d3d12_heap_allocator.cpp" />
-    <ClCompile Include="memory\d3d12_memory.cpp" />
-    <ClCompile Include="memory\d3d12_ring_allocator.cpp" />
-    <ClCompile Include="memory\d3d12_subresource_allocator.cpp" />
-    <ClCompile Include="memory\first_fit_allocator.cpp" />
-    <ClCompile Include="renderer\command_list_factory.cpp" />
-    <ClCompile Include="renderer\d3d12_command_list_factory.cpp" />
-    <ClCompile Include="renderer\online_descriptor_heap.cpp" />
-    <ClCompile Include="renderer\render_atom.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="renderer\render_context.cpp" />
-    <ClCompile Include="renderer\d3d12_render_device.cpp" />
-    <ClCompile Include="renderer\d3d12_render_resource_context.cpp" />
-    <ClCompile Include="renderer\render_tasks.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="renderer\resource_manager.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="resource\d3d12_buffer_writer.cpp" />
-    <ClCompile Include="resource\d3d12_offline_descriptor_heap.cpp" />
-    <ClCompile Include="resource\d3d12_resource_manager.cpp" />
-    <ClCompile Include="resource\d3d12_shader_factory.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\math\math.vcxproj">
-      <Project>{78b3bbe3-e704-4044-a458-d4cef6761565}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{CCC98F37-7886-43D7-9E50-306AABA81AA4}</ProjectGuid>
+    <ProjectGuid>{4D605AE6-6861-4BE7-A320-BFC7F5ACEECC}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>renderer_d3d12</RootNamespace>
+    <RootNamespace>UnitTest</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.10240.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -138,29 +58,38 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\project_property_template.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\project_property_template.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\project_property_template.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\project_property_template.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)\output\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(SolutionDir)\intermediate\$(Configuration)\$(Platform)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -173,7 +102,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -188,7 +117,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -205,7 +134,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -214,6 +143,9 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

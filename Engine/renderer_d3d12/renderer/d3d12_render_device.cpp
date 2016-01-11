@@ -1,5 +1,11 @@
 #include "d3d12_render_device.h"
-#include "resource_manager.h"
+#include <core/assert/assert.h>
+
+#include "d3d12_command_list_factory.h"
+#include "d3d12_render_resource_context.h"
+
+#include "../resource/d3d12_resource_manager.h"
+#include "../memory/d3d12_memory.h"
 
 namespace ue
 {
@@ -11,10 +17,18 @@ D3D12RenderDevice::D3D12RenderDevice(const RenderDeviceDesc & desc)
 , _back_buffer_index(0)
 {
 	open();
+
+	d3d12_memory::initialize(*this);
+	
+	_command_list_factory = new D3D12CommandListFactory(*this);
+	_resource_manager = new D3D12ResourceManager(*this);
 }
 
 D3D12RenderDevice::~D3D12RenderDevice()
 {
+	delete _resource_manager;
+	delete _command_list_factory;
+
 	close();
 }
 
@@ -25,14 +39,12 @@ void D3D12RenderDevice::open()
 		_debug->EnableDebugLayer();
 	}
 	
-	
 
 	HRESULT hr = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&_device));
 	UENSURE(SUCCEEDED(hr));
 	
 	D3D12_FEATURE_DATA_D3D12_OPTIONS feature_options = {};
 	_device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &feature_options, sizeof(feature_options));
-
 
 	D3D12_COMMAND_QUEUE_DESC cmdq_desc;
 	cmdq_desc.NodeMask = 0;
@@ -83,6 +95,7 @@ void D3D12RenderDevice::open()
 
 void D3D12RenderDevice::close()
 {
+	CloseHandle(_fence_event);
 }
 
 
@@ -110,5 +123,14 @@ void D3D12RenderDevice::wait_for_fence()
 	}
 }
 
+D3D12RenderResourceContext* D3D12RenderDevice::new_render_resource_context()
+{
+	return new D3D12RenderResourceContext(*this);
+}
+
+void D3D12RenderDevice::destroy_render_resource_context(D3D12RenderResourceContext* rrc)
+{
+	delete rrc;
+}
 
 }

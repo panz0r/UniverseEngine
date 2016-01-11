@@ -17,6 +17,7 @@ enum class CubeFace : int
 
 enum Components
 {
+	Position = 0,
 	Normals = 1 << 0,
 	Colors = 1 << 1,
 	UVs = 1 << 2,

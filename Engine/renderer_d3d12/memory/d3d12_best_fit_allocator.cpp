@@ -15,10 +15,10 @@ D3D12BestFitAllocator::~D3D12BestFitAllocator()
 {
 }
 
-D3D12Allocation D3D12BestFitAllocator::allocate(unsigned slot_count)
+D3D12Allocation D3D12BestFitAllocator::allocate(unsigned slot_count, unsigned align)
 {
 	Entry* entry;
-	if (find_best_fit(slot_count, entry)) {
+	if (find_best_fit(slot_count, align, entry)) {
 		return make_allocation(entry, slot_count);
 	}
 
@@ -78,11 +78,12 @@ void D3D12BestFitAllocator::allocate_from_entry(Entry* entry, unsigned count)
 }
 
 
-bool D3D12BestFitAllocator::find_best_fit(unsigned count, Entry*& entry)
+bool D3D12BestFitAllocator::find_best_fit(unsigned count, unsigned align, Entry*& entry)
 {
 	unsigned best_count = UINT_MAX;
 	Entry* iter = free_list_begin();
 	while (iter) {
+		unsigned misalignment_count = SLOT_ALIGN(iter->offset, align);
 		if (iter->count >= count && iter->count < best_count) {
 			best_count = iter->count;
 			entry = iter;

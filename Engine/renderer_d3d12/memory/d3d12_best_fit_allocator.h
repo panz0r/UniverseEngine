@@ -7,14 +7,15 @@ namespace ue
 {
 
 #define INVALID_ENTRY 0xffffffff
+#define SLOT_ALIGN(x,a) ((x + (a-1) & ~(a-1)))
 
-class D3D12BestFitAllocator
+class D3D12BestFitAllocator : public D3D12AllocatorInterface
 {
 public:
 	D3D12BestFitAllocator(D3D12HeapAllocatorInterface* heap_allocator);
 	~D3D12BestFitAllocator();
 
-	D3D12Allocation allocate(unsigned slot_count);
+	D3D12Allocation allocate(unsigned slot_count, unsigned align = 1U);
 	void deallocate(const D3D12Allocation& allocation);
 
 private:
@@ -35,7 +36,7 @@ private:
 
 	D3D12Allocation make_allocation(Entry* entry, unsigned count);
 	void allocate_from_entry(Entry* entry, unsigned count);
-	bool find_best_fit(unsigned count, Entry*& entry);
+	bool find_best_fit(unsigned count, unsigned align, Entry*& entry);
 	void insert_last(D3D12HeapHandle heap, unsigned offset, unsigned count);
 	void insert_before(D3D12HeapHandle heap, unsigned offset, unsigned count, Entry* entry);
 	void try_merge_with_next(Entry* entry);

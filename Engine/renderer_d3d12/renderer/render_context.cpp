@@ -1,6 +1,6 @@
+#include <renderer_d3d12\stdinclude.h>
 #include "render_context.h"
 #include "render_atom.h"
-#include "d3dx12.h"
 
 namespace ue
 {

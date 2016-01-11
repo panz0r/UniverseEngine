@@ -31,6 +31,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine, 
 		wndclassex.hIconSm = wndclassex.hIcon;
 	}
 
+
 	if (!::RegisterClassEx(&wndclassex))
 	{
 		return 0;

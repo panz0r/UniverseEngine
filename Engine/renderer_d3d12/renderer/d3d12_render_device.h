@@ -11,7 +11,9 @@
 namespace ue
 {
 
-class ResourceManager;
+class D3D12ResourceManager;
+class D3D12CommandListFactory;
+class D3D12RenderResourceContext;
 
 class D3D12RenderDevice : public IRenderDevice
 {
@@ -39,6 +41,12 @@ public:
 	ID3D12Resource * get_back_buffer(unsigned index) { return _back_buffers[index]; }
 	ID3D12CommandQueue * command_queue() { return _command_queue.Get(); }
 
+	D3D12CommandListFactory* command_list_factory() { return _command_list_factory; }
+	D3D12ResourceManager* resource_manager() { return _resource_manager; }
+
+	D3D12RenderResourceContext* new_render_resource_context();
+	void destroy_render_resource_context(D3D12RenderResourceContext* rrc);
+
 private:
 	RenderDeviceDesc _render_device_desc;
 	unsigned _back_buffer_index;
@@ -55,6 +63,10 @@ private:
 	ComPtr<ID3D12Fence> _fence;
 	HANDLE _fence_event;
 	unsigned long long _fence_value;
+
+
+	D3D12CommandListFactory* _command_list_factory;
+	D3D12ResourceManager* _resource_manager;
 };
 
 

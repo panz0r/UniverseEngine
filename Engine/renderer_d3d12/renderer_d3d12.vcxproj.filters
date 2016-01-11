@@ -13,6 +13,9 @@
     <Filter Include="resources">
       <UniqueIdentifier>{a7d6aee5-1082-4a86-94a3-81897d1b0517}</UniqueIdentifier>
     </Filter>
+    <Filter Include="memory\resource_allocators">
+      <UniqueIdentifier>{c93dc350-057a-41c1-b823-1af28bddb8b1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="renderer\render_device_desc.h">
@@ -33,9 +36,6 @@
     <ClInclude Include="renderer\render_tasks.h">
       <Filter>renderer</Filter>
     </ClInclude>
-    <ClInclude Include="d3dx12.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
     <ClInclude Include="renderer\render_atom.h">
       <Filter>renderer</Filter>
     </ClInclude>
@@ -45,23 +45,11 @@
     <ClInclude Include="memory\first_fit_allocator.h">
       <Filter>memory</Filter>
     </ClInclude>
-    <ClInclude Include="resource\texture.h">
-      <Filter>resources</Filter>
-    </ClInclude>
     <ClInclude Include="resource\placed_gpu_resource.h">
-      <Filter>resources</Filter>
-    </ClInclude>
-    <ClInclude Include="resource\common.h">
-      <Filter>resources</Filter>
-    </ClInclude>
-    <ClInclude Include="resource\buffer.h">
       <Filter>resources</Filter>
     </ClInclude>
     <ClInclude Include="resource\pipeline_state_object.h">
       <Filter>resources</Filter>
-    </ClInclude>
-    <ClInclude Include="renderer\render_resource_context.h">
-      <Filter>renderer</Filter>
     </ClInclude>
     <ClInclude Include="renderer\command_list.h">
       <Filter>renderer</Filter>
@@ -90,9 +78,6 @@
     <ClInclude Include="resource\d3d12_render_atom.h">
       <Filter>resources</Filter>
     </ClInclude>
-    <ClInclude Include="resource\d3d12_pipeline_state_object.h">
-      <Filter>resources</Filter>
-    </ClInclude>
     <ClInclude Include="resource\d3d12_render_resource.h">
       <Filter>resources</Filter>
     </ClInclude>
@@ -105,10 +90,60 @@
     <ClInclude Include="memory\d3d12_best_fit_allocator.h">
       <Filter>memory</Filter>
     </ClInclude>
-    <ClInclude Include="memory\d3d12_allocator.h">
+    <ClInclude Include="memory\d3d12_allocator_interface.h">
       <Filter>memory</Filter>
     </ClInclude>
-    <ClInclude Include="memory\d3d12_allocator_interface.h">
+    <ClInclude Include="resource\d3d12_resource_manager.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="stdinclude.h" />
+    <ClInclude Include="d3dx12.h" />
+    <ClInclude Include="resource\d3d12_resource_storage.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\d3d12_buffer_writer.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\d3d12_shader_factory.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\d3d12_command_list_factory.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\d3d12_root_signature.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\d3d12_pipeline_state.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\d3d12_shader.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\d3d12_memory.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\d3d12_ring_allocator.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\d3d12_subresource_allocator.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\d3d12_resource.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\d3d12_render_resource_context.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\d3d12_heap_allocator.h">
+      <Filter>memory\resource_allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\d3d12_comitted_allocator.h">
+      <Filter>memory\resource_allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\d3d12_descriptor_allocator.h">
+      <Filter>memory\resource_allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\d3d12_allocation.h">
       <Filter>memory</Filter>
     </ClInclude>
   </ItemGroup>
@@ -131,9 +166,6 @@
     <ClCompile Include="memory\first_fit_allocator.cpp">
       <Filter>memory</Filter>
     </ClCompile>
-    <ClCompile Include="renderer\render_resource_context.cpp">
-      <Filter>renderer</Filter>
-    </ClCompile>
     <ClCompile Include="renderer\online_descriptor_heap.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
@@ -146,8 +178,38 @@
     <ClCompile Include="memory\d3d12_best_fit_allocator.cpp">
       <Filter>memory</Filter>
     </ClCompile>
-    <ClCompile Include="memory\d3d12_allocator.cpp">
+    <ClCompile Include="resource\d3d12_resource_manager.cpp">
+      <Filter>resources</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\d3d12_shader_factory.cpp">
+      <Filter>resources</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\d3d12_command_list_factory.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="memory\d3d12_ring_allocator.cpp">
       <Filter>memory</Filter>
+    </ClCompile>
+    <ClCompile Include="memory\d3d12_subresource_allocator.cpp">
+      <Filter>memory</Filter>
+    </ClCompile>
+    <ClCompile Include="memory\d3d12_memory.cpp">
+      <Filter>memory</Filter>
+    </ClCompile>
+    <ClCompile Include="resource\d3d12_buffer_writer.cpp">
+      <Filter>resources</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\d3d12_render_resource_context.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="memory\d3d12_heap_allocator.cpp">
+      <Filter>memory\resource_allocators</Filter>
+    </ClCompile>
+    <ClCompile Include="memory\d3d12_comitted_allocator.cpp">
+      <Filter>memory\resource_allocators</Filter>
+    </ClCompile>
+    <ClCompile Include="memory\d3d12_descriptor_allocator.cpp">
+      <Filter>memory\resource_allocators</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -7,8 +7,8 @@ namespace ue
 {
 
 class D3D12RenderDevice;
-class CommandListFactory;
-class ResourceManager;
+class D3D12CommandListFactory;
+class D3D12ResourceManager;
 class OnlineDescriptorHeapFactory;
 
 class Application
@@ -24,8 +24,8 @@ private:
 
 	void* _window_handle;
 	D3D12RenderDevice *_render_device;
-	CommandListFactory *_command_list_factory;
-	ResourceManager *_resource_manager;
+	D3D12CommandListFactory *_command_list_factory;
+	D3D12ResourceManager *_resource_manager;
 	OnlineDescriptorHeapFactory *_descriptor_heap_factory;
 
 

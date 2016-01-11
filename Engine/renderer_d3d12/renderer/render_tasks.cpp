@@ -2,7 +2,7 @@
 #include "render_atom.h"
 #include "command_list_factory.h"
 #include "online_descriptor_heap.h"
-#include <renderer_d3d12/resource/texture.h>
+#include <renderer_d3d12/resource/d3d12_texture.h>
 #include <d3d12.h>
 
 namespace ue

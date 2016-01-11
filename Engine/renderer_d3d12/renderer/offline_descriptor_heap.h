@@ -1,9 +1,8 @@
 #pragma once
 
-#include <d3d12.h>
-#include "d3dx12.h"
-#include <core/assert/assert.h>
+#include <renderer_d3d12\stdinclude.h>
 #include <renderer_d3d12/com/com_ptr.h>
+#include <core/assert/assert.h>
 #include <vector>
 
 

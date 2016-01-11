@@ -5,7 +5,7 @@ cbuffer draw : register(b0)
 
 };
 
-
+	
 
 struct VS_INPUT
 {
